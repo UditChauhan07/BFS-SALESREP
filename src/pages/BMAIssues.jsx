@@ -49,7 +49,7 @@ const BMAIssues = () => {
             const user = await GetAuthData(); // Fetch user data
             const userPermissions = await getPermissions(); // Fetch permissions
             setPermissions(userPermissions); // Set permissions in state
-            if(userPermissions.modules?.customerSupport?.childModules?.brandManagementApproval?.view === false){
+            if(userPermissions.modules?.customerSupport?.childModules?.brandManagementApproval?.create === false){
                 PermissionDenied()
                 navigate('/dashboard')
             }
@@ -65,6 +65,7 @@ const BMAIssues = () => {
     if (sumitForm) return <Loading height={'80vh'} />;
     return (
         <CustomerSupportLayout
+        permissions={permissions}
             filterNodes={
                 <>
 

@@ -6,14 +6,17 @@ import ModalPage from "../Modal UI";
 import { Link, useNavigate } from "react-router-dom";
 import { CustomerServiceIcon, OrderStatusIcon, DefaultSupportIcon, MarketingSupportIcon, DIFTestIcon, DisplayIssuesIcon, BackArrow } from "../../lib/svg";
 import { BiLeftArrow } from "react-icons/bi";
+import PermissionDenied from "../PermissionDeniedPopUp/PermissionDenied";
 
-const CustomerSupportLayout = ({ children, filterNodes }) => {
+const CustomerSupportLayout = ({ children, filterNodes, permissions }) => {
     const navigate = useNavigate();
     const path = window.location.pathname;
     let to = "/customer-support"
     if (path == "/orderStatusForm") {
         to = "/orderStatus"
     }
+    console.log({permissions});
+    
 
     const reasons = {
         Charges: "Charges",
@@ -32,8 +35,19 @@ const CustomerSupportLayout = ({ children, filterNodes }) => {
                         <div className="row">
                             <div className="col-lg-3 col-md-12 col-sm-12">
                                 <div className={Styles.supportLeft}>
-                                    <Link to={"/orderStatus"} className={`${(path == "/orderStatus" || path == "/orderStatusForm") && Styles1.activeReason}`}>
-                                        <div className={`${Styles.supportLeftBox} cardHover`} >
+                                    {permissions?.modules?.customerSupport?.childModules?.order_Status?.create ?
+                                        <Link to={"/orderStatus"} className={`${(path == "/orderStatus" || path == "/orderStatusForm") && Styles1.activeReason}`}>
+                                            <div className={`${Styles.supportLeftBox} cardHover`} >
+                                                <div className={Styles.supportLeftImg}>
+                                                    <OrderStatusIcon width={42} height={42} />
+                                                </div>
+
+                                                <div className={Styles.supportLeftContent}>
+                                                    <h2>Order Status</h2>
+                                                    <p>View or Request Invoices and Tracking</p>
+                                                </div>
+                                            </div>
+                                        </Link> : <div className={`${Styles.supportLeftBox} cardHover`} onClick={PermissionDenied}>
                                             <div className={Styles.supportLeftImg}>
                                                 <OrderStatusIcon width={42} height={42} />
                                             </div>
@@ -42,15 +56,28 @@ const CustomerSupportLayout = ({ children, filterNodes }) => {
                                                 <h2>Order Status</h2>
                                                 <p>View or Request Invoices and Tracking</p>
                                             </div>
-                                        </div>
-                                    </Link>
-                                    <Link to={"/customerService"} className={`${path == "/customerService" && Styles1.activeReason}`}>
-                                        <div
+                                        </div>}
+                                    {permissions?.modules?.customerSupport?.childModules?.customer_service?.create ?
+                                        <Link to={"/customerService"} className={`${path == "/customerService" && Styles1.activeReason}`}>
+                                            <div
+                                                className={`${Styles.supportLeftBox} cardHover`}
+                                                style={{ cursor: "pointer" }}
+                                            // onClick={() => {
+                                            //   setModalOpen(true);
+                                            // }}
+                                            >
+                                                <div className={Styles.supportLeftImg}>
+                                                    <CustomerServiceIcon width={42} height={42} />
+                                                </div>
+                                                <div className={Styles.supportLeftContent}>
+                                                    <h2>Customer Services </h2>
+                                                    <p>Report order issues or update account</p>
+                                                </div>
+                                            </div>
+                                        </Link> : <div
                                             className={`${Styles.supportLeftBox} cardHover`}
                                             style={{ cursor: "pointer" }}
-                                        // onClick={() => {
-                                        //   setModalOpen(true);
-                                        // }}
+                                            onClick={PermissionDenied}
                                         >
                                             <div className={Styles.supportLeftImg}>
                                                 <CustomerServiceIcon width={42} height={42} />
@@ -59,14 +86,23 @@ const CustomerSupportLayout = ({ children, filterNodes }) => {
                                                 <h2>Customer Services </h2>
                                                 <p>Report order issues or update account</p>
                                             </div>
-                                        </div>
-                                    </Link>
+                                        </div>}
                                     {/* Brand Management Approval */}
-                                    <Link
-                                    to={"/brandManagementApproval"}
-                                    className={`${path == "/brandManagementApproval" && Styles1.activeReason}`}
-                                    >
-                                        <div className={`${Styles.supportLeftBox} cardHover`}>
+                                    {permissions?.modules?.customerSupport?.childModules?.brandManagementApproval?.create ?
+                                        <Link
+                                            to={"/brandManagementApproval"}
+                                            className={`${path == "/brandManagementApproval" && Styles1.activeReason}`}
+                                        >
+                                            <div className={`${Styles.supportLeftBox} cardHover`}>
+                                                <div className={Styles.supportLeftImg}>
+                                                    <DefaultSupportIcon width={42} height={42} />
+                                                </div>
+                                                <div className={Styles.supportLeftContent}>
+                                                    <h2>Brand Management Approval </h2>
+                                                    <p>Effective Management</p>
+                                                </div>
+                                            </div>
+                                        </Link> : <div className={`${Styles.supportLeftBox} cardHover`} onClick={PermissionDenied}>
                                             <div className={Styles.supportLeftImg}>
                                                 <DefaultSupportIcon width={42} height={42} />
                                             </div>
@@ -74,8 +110,7 @@ const CustomerSupportLayout = ({ children, filterNodes }) => {
                                                 <h2>Brand Management Approval </h2>
                                                 <p>Effective Management</p>
                                             </div>
-                                        </div>
-                                    </Link>
+                                        </div>}
 
                                     <div>
                                         <div className={`${Styles.supportLeftBox} cardHover`}>

@@ -113,8 +113,8 @@
 }
 
 .top_perform1 {
-  /* border-right: 1px rgb(32, 32, 32) dashed; */
-  /* position: relative; */
+  border-right: 1px rgb(32, 32, 32) dashed;
+  position: relative;
 }
 
 .topPerform2 {

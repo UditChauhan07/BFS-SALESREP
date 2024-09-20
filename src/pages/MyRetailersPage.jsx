@@ -41,7 +41,7 @@ const MyRetailersPage = () => {
 
         // Fetch permissions
         const userPermissions = await getPermissions();
-        setHasPermission(userPermissions?.modules?.myRetailers?.view);
+        setHasPermission(userPermissions?.modules?.order?.create);
 
         // Fetch retailer list
         getRetailerListHandler({ key: user.x_access_token, userId: selectedSalesRepId ?? user.Sales_Rep__c });
@@ -67,7 +67,7 @@ const MyRetailersPage = () => {
       navigate("/dashboard"); // Redirect to dashboard if no permission
       PermissionDenied()
     }
-  }, [hasPermission, navigate]);
+  }, [hasPermission]);
 
   const getRetailerListHandler = ({ key, userId }) => {
     setRetailerList({ data: [], isLoading: true });

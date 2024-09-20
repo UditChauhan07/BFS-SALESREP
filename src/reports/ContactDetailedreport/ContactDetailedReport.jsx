@@ -11,7 +11,10 @@ import { CloseButton } from "../../lib/svg";
 import { MdOutlineDownload } from "react-icons/md";
 import { getPermissions } from "../../lib/permission";
 import FilterSearch from '../../components/FilterSearch';
+import PermissionDenied from '../../components/PermissionDeniedPopUp/PermissionDenied';
+import { useNavigate } from 'react-router-dom';
 function ContactDetailedReport() {
+    const navigate = useNavigate();
     const [accountManufacturerRecords, setAccountManufacturerRecords] = useState([]);
     const [filteredRecords, setFilteredRecords] = useState([]);
     const [filters, setFilters] = useState({
@@ -212,6 +215,10 @@ function ContactDetailedReport() {
             const user = await GetAuthData(); // Fetch user data
             const userPermissions = await getPermissions(); // Fetch permissions
             setPermissions(userPermissions); // Set permissions in state
+            if (userPermissions?.modules?.reports?.contactDetailedReport.view === false) {
+                PermissionDenied()
+                navigate('/dashboard')
+            }
           } catch (err) {
             console.error("Error fetching permissions", err);
           }

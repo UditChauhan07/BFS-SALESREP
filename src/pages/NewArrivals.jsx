@@ -1,4 +1,4 @@
-import React, { useEffect, useState , useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import AppLayout from "../components/AppLayout";
 import Loading from "../components/Loading";
 import NewArrivalsPage from "../components/NewArrivalsPage/NewArrivalsPage";
@@ -7,14 +7,12 @@ import { CloseButton } from "../lib/svg";
 import { GetAuthData, getMarketingCalendar } from "../lib/store";
 import { useNavigate } from "react-router-dom";
 import { getPermissions } from "../lib/permission";
+import PermissionDenied from "../components/PermissionDeniedPopUp/PermissionDenied";
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const NewArrivals = () => {
   const [isLoaded, setIsloaed] = useState(false);
   const [productList, setProductList] = useState([]);
-  const [selectedSalesRepId, setSelectedSalesRepId] = useState();
-  const [userData, setUserData] = useState({});
-  const [hasPermission, setHasPermission] = useState(null); 
   const [permissions, setPermissions] = useState(null);
   const navigate = useNavigate()
   let brands = [
@@ -57,66 +55,44 @@ const NewArrivals = () => {
 
   const [brand, setBrand] = useState();
 
-useEffect(() => {
-  GetAuthData().then((user) => {
-    getMarketingCalendar({ key: user.x_access_token }).then((productRes) => {
-      productRes.map((month)=>{
-        month.content.map((element)=>{
-          element.date = element.Ship_Date__c ? (element.Ship_Date__c.split("-")[2] == 15 ? 'TBD' : element.Ship_Date__c.split("-")[2]) + '/' + monthNames[parseInt(element.Ship_Date__c.split("-")[1]) - 1].toUpperCase() + '/' + element.Ship_Date__c.split("-")[0]:'NA';
-          element.OCDDate = element.Launch_Date__c ? (element.Launch_Date__c.split("-")[2] == 15 ? 'TBD' : element.Launch_Date__c.split("-")[2]) + '/' + monthNames[parseInt(element.Launch_Date__c.split("-")[1]) - 1].toUpperCase() + '/' + element.Launch_Date__c.split("-")[0]:'NA';
-          return element
+  useEffect(() => {
+    GetAuthData().then((user) => {
+      getMarketingCalendar({ key: user.x_access_token }).then((productRes) => {
+        productRes.map((month) => {
+          month.content.map((element) => {
+            element.date = element.Ship_Date__c ? (element.Ship_Date__c.split("-")[2] == 15 ? 'TBD' : element.Ship_Date__c.split("-")[2]) + '/' + monthNames[parseInt(element.Ship_Date__c.split("-")[1]) - 1].toUpperCase() + '/' + element.Ship_Date__c.split("-")[0] : 'NA';
+            element.OCDDate = element.Launch_Date__c ? (element.Launch_Date__c.split("-")[2] == 15 ? 'TBD' : element.Launch_Date__c.split("-")[2]) + '/' + monthNames[parseInt(element.Launch_Date__c.split("-")[1]) - 1].toUpperCase() + '/' + element.Launch_Date__c.split("-")[0] : 'NA';
+            return element
+          })
+          return month;
         })
-        return month;
-      })
-      setProductList(productRes)
-      setIsloaed(true)
-    }).catch((err) => console.log({ err }))
-  }).catch((e) => console.log({ e }))
-}, [isLoaded])
+        setProductList(productRes)
+        setIsloaed(true)
+      }).catch((err) => console.log({ err }))
+    }).catch((e) => console.log({ e }))
+  }, [isLoaded])
 
   useEffect(() => {
     HendleClear();
   }, []);
   const HendleClear = () => {
-    const currentMonthIndex = new Date().getMonth() ;
+    const currentMonthIndex = new Date().getMonth();
     setMonth(months[currentMonthIndex].value);
     setBrand(null);
   };
 
 
-   // Fetch user data and permissions
-   useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
       try {
-        const user = await GetAuthData();
-        setUserData(user);
-
-        if (!selectedSalesRepId) {
-          setSelectedSalesRepId(user.Sales_Rep__c);
-        }
-
-        const userPermissions = await getPermissions();
-        setHasPermission(userPermissions?.modules?.newArrivals?.view);
-
-        // If no permission, redirect to dashboard
-        if (userPermissions?.modules?.newArrivals?.view === false) {
-          navigate("/dashboard");
-        }
-        
+        const userPermissions = await getPermissions()
+        if (userPermissions?.modules?.newArrivals?.view === false) { PermissionDenied(); navigate('/dashboard'); }
       } catch (error) {
-        console.log({ error });
+        console.log("Permission Error", error)
       }
-    };
-    
-    fetchData();
-  }, [navigate, selectedSalesRepId]);
-
-  // Check permission and handle redirection
-  useEffect(() => {
-    if (hasPermission === false) {
-      navigate("/dashboard");  // Redirect if no permission
     }
-  }, [hasPermission, navigate]);
+    fetchData()
+  }, [])
 
   useEffect(() => {
     async function fetchPermissions() {
@@ -138,7 +114,7 @@ useEffect(() => {
     <AppLayout
       filterNodes={
         <>
-        
+
           <FilterItem
             minWidth="220px"
             label="All Brands"
@@ -160,18 +136,18 @@ useEffect(() => {
             }}
           />
           <button className="border px-2 py-1 leading-tight d-grid" onClick={HendleClear}>
-          <CloseButton crossFill={'#fff'} height={20} width={20} />
-          <small style={{ fontSize: '6px',letterSpacing: '0.5px',textTransform:'uppercase'}}>clear</small>
+            <CloseButton crossFill={'#fff'} height={20} width={20} />
+            <small style={{ fontSize: '6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>clear</small>
           </button>
-        
-       
+
+
         </>
       }
     >
-     {!isLoaded ? (
+      {!isLoaded ? (
         <Loading height={"70vh"} />
-    ) : (
-      <NewArrivalsPage brand={brand} month={month} productList={productList} />
+      ) : (
+        <NewArrivalsPage brand={brand} month={month} productList={productList} />
       )}
     </AppLayout>
   );

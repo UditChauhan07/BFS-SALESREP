@@ -315,14 +315,9 @@ const memoizedPermissions = useMemo(() => permissions, [permissions]);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const user = await GetAuthData();
-        setUserData(user);
-
-        if (!selectedSalesRepId) {
-          setSelectedSalesRepId(user.Sales_Rep__c);
-        }
 
         const userPermissions = await getPermissions();
+        setPermissions(userPermissions);
         setHasPermission(userPermissions?.modules?.reports?.salesReport?.view);
 
         // If no permission, redirect to dashboard
@@ -337,15 +332,8 @@ const memoizedPermissions = useMemo(() => permissions, [permissions]);
     };
     
     fetchData();
-  }, [navigate, selectedSalesRepId]);
+  }, []);
 
-  // Check permission and handle redirection
-  useEffect(() => {
-    if (hasPermission === false) {
-      PermissionDenied()
-      navigate("/dashboard");  // Redirect if no permission
-    }
-  }, [hasPermission, navigate]);
 
   
   return (

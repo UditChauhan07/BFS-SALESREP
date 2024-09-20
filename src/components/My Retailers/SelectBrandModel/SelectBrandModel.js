@@ -15,7 +15,7 @@ const SelectBrandModel = ({ brands, onClose = null, onChange = null }) => {
 
   return (
     <>
-      <div className="px-[68px] pb-[67px] pt-[40px] max-w-[900px]">
+      <div className="px-[10px] pb-[10px] pt-[10px] max-w-[900px]">
         <section>
           <div className="d-flex align-items-center justify-content-between gap-5 mb-4">
             <h1 className="font-[Montserrat-500] text-[22px] tracking-[2.20px] text-center">

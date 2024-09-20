@@ -6,6 +6,7 @@ import ModalPage from "../components/Modal UI";
 import ProductDetailCard from "../components/ProductDetailCard";
 import { CloseButton } from "../lib/svg";
 import Select from 'react-select';
+import { getPermissions } from "../lib/permission";
 
 const ProductDetails = ({ productId, setProductDetailId, isAddtoCart = true, AccountId = null, ManufacturerId = null, toRedirect = "/my-retailers" }) => {
     const { orders, setOrders, setOrderQuantity, addOrder, setOrderProductPrice } = useBag();
@@ -17,6 +18,19 @@ const ProductDetails = ({ productId, setProductDetailId, isAddtoCart = true, Acc
     const [accountId, setAccountId] = useState({ label: null, value: AccountId });
     const [storeSel, setStoreSet] = useState(false)
     const [autoSelectCheck, setAutoSelectCheck] = useState(false)
+    const [createOrder,setCreateOrder] = useState(false)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const userPermissions = await getPermissions()
+                setCreateOrder(userPermissions?.modules?.order?.create)
+            } catch (error) {
+                console.log("Permission Error", error)
+            }
+        }
+        fetchData()
+    }, [])
 
     const formattedPrice = useMemo(() => {
         const prices = product?.data?.price; // Assume price is in product.data.price
@@ -224,7 +238,7 @@ const ProductDetails = ({ productId, setProductDetailId, isAddtoCart = true, Acc
                             />
                         ) : null}
                         {!product?.isLoaded ? <Loading /> :
-                            <ProductDetailCard product={product} orders={orders} onQuantityChange={onQuantityChange} onPriceChangeHander={onPriceChangeHander} isAddtoCart={accountId.value ? true : false} AccountId={AccountId} toRedirect={toRedirect} setStoreSet={setStoreSet} accountId={accountId} accounts={accountList.isLoaded ? accountList.data.length : 'load'} autoSelectCheck={autoSelectCheck} />}
+                            <ProductDetailCard product={product} orders={orders} onQuantityChange={onQuantityChange} onPriceChangeHander={onPriceChangeHander} isAddtoCart={accountId.value ? true : false} AccountId={AccountId} toRedirect={toRedirect} setStoreSet={setStoreSet} accountId={accountId} accounts={accountList.isLoaded ? accountList.data.length : 'load'} autoSelectCheck={autoSelectCheck} createOrder={createOrder}/>}
                         {/* */}
                     </div>
                 }

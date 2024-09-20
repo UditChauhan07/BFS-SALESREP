@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { DateConvert } from "../../lib/store";
 import Loading from "../Loading";
-const ProductDetailCard = ({ product, orders, onPriceChangeHander = null, onQuantityChange = null, isAddtoCart, AccountId, toRedirect, setStoreSet = null, accountId = null, accounts = 0,autoSelectCheck=false }) => {
+const ProductDetailCard = ({ product, orders, onPriceChangeHander = null, onQuantityChange = null, isAddtoCart, AccountId, toRedirect, setStoreSet = null, accountId = null, accounts = 0,autoSelectCheck=false,createOrder }) => {
   console.log({autoSelectCheck});
   
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -109,7 +109,7 @@ const ProductDetailCard = ({ product, orders, onPriceChangeHander = null, onQuan
           {accountId?.label && <p className={Styles.descHolder}>
             Store For: <span >{accountId?.label}</span>
           </p>}
-          {orders[product?.data?.Id] ? (
+          {createOrder ? orders[product?.data?.Id] ? (
               <div className="d-flex flex-column">
                 <p style={{ textAlign: "start" }}>
                   $
@@ -180,7 +180,7 @@ const ProductDetailCard = ({ product, orders, onPriceChangeHander = null, onQuan
                       </Link>
                     </div>
                   )}</>}
-            </> : <small className="text-left w-[100%] font-['Arial-400'] text-[#FF7F7F] d-block">You can't buy this product. contact to salesforce Admin.</small>)}
+            </> : <small className="text-left w-[100%] font-['Arial-400'] text-[#FF7F7F] d-block">You can't buy this product. contact to salesforce Admin.</small>):<small className="text-left w-[100%] font-['Arial-400'] text-[#FF7F7F] d-block">You don't have permission to buy this product. contact to salesforce Admin.</small>}
           {/* {product?.data?.Description && <p style={{ textAlign: 'start', color: "#898989" }}>{product?.data?.Description}</p>} */}
           <hr style={{ borderTop: "3px dashed #000", fontSize: "20px", color: "black" }}></hr>
           {product?.data?.ProductCode && <p className={Styles.descHolder}>

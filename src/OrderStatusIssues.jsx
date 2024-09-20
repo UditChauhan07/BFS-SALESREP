@@ -52,19 +52,20 @@ const OrderStatusIssues = () => {
 
     })
 
+
     useEffect(() => {
-        async function fetchPermissions() {
+        const fetchData = async () => {
           try {
-            const user = await GetAuthData(); // Fetch user data
-            const userPermissions = await getPermissions(); // Fetch permissions
-            setPermissions(userPermissions); // Set permissions in state
-          } catch (err) {
-            console.error("Error fetching permissions", err);
+            const userPermissions = await getPermissions();
+            setPermissions(userPermissions);
+            if (userPermissions?.modules?.customerSupport?.childModules
+                ?.order_Status?.create === false) { PermissionDenied(); navigate('/dashboard'); }
+          } catch (error) {
+            console.log("Permission Error", error)
           }
         }
-    
-        fetchPermissions(); // Fetch permissions on mount
-      }, []);
+        fetchData()
+      }, [])
     
       // Memoize permissions to avoid unnecessary re-calculations
       const memoizedPermissions = useMemo(() => permissions, [permissions]);
@@ -161,50 +162,9 @@ const OrderStatusIssues = () => {
         setOrders([])
         getOrderlIsthandler({ key: userData.x_access_token, Sales_Rep__c: value })
     }
-
-    useEffect(() => {
-        async function fetchData() {
-          try {
-            const user = await GetAuthData();
-            setUserData(user);
-            if (!selectedSalesRepId) setSelectedSalesRepId(user.Sales_Rep__c);
-      
-            // Fetch permissions
-            const userPermissions = await getPermissions();
-            setHasPermission(userPermissions?.modules?.customerSupport?.childModules
-                ?.order_Status?.view);
-      
-            // Fetch orders
-            getOrderlIsthandler({
-              key: user.x_access_token,
-              Sales_Rep__c: selectedSalesRepId ?? user.Sales_Rep__c,
-            });
-      
-            // Fetch sales reps if admin
-            if (admins.includes(user.Sales_Rep__c)) {
-              getSalesRepList({ key: user.x_access_token })
-                .then((repRes) => {
-                  setSalesRepList(repRes.data);
-                })
-                .catch((repErr) => {
-                  console.log({ repErr });
-                });
-            }
-          } catch (err) {
-            console.log({ err });
-          }
-        }
-      
-        fetchData();
-      }, [filterValue.month]);
-      useEffect(() => {
-        if (hasPermission === false) {
-          navigate("/dashboard");
-          PermissionDenied() // Redirect to dashboard if no permission
-        }
-      }, [hasPermission, navigate]);
             
     return (<CustomerSupportLayout
+        permissions={permissions}
         filterNodes={
             <>
                {memoizedPermissions?.modules?.godLevel  ? <>

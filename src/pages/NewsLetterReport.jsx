@@ -2,10 +2,24 @@ import { useLocation } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import { useEffect,useState } from 'react';
 import EmailTable from "../components/EmailBlasts/EmailTable";
+import { useNavigate } from "react-router-dom";
+import PermissionDenied from "../components/PermissionDeniedPopUp/PermissionDenied";
+import { getPermissions } from '../lib/permission';
 const NewsLetterReport = () => {
     const location = useLocation();
+    const navigate = useNavigate()
     const { year, month, day,newsletter } = location.state || {};
-    console.log({year, month, day,newsletter});
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const userPermissions = await getPermissions()
+                if (userPermissions?.modules?.emailBlast?.view === false) { PermissionDenied();navigate('/dashboard'); }
+            } catch (error) {
+                console.log("Permission Error", error)
+            }
+        }
+        fetchData()
+    }, [])
     
 
     const [monthList, setMonthList] = useState([]);

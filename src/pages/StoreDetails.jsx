@@ -14,7 +14,7 @@ const StoreDetails = ()=>{
     const [brandList,setBrandList] = useState([])
     const [userData, setUserData] = useState({});
     const [hasPermission, setHasPermission] = useState(null);
-    const [permissions, setPermissions] = useState(null);
+    const [memoizedPermissions, setMemoizedPermissions] = useState(null);
     const [selectedSalesRepId, setSelectedSalesRepId] = useState();
     useEffect(()=>{
         if(id){
@@ -51,6 +51,8 @@ const StoreDetails = ()=>{
                 }
         
                 const userPermissions = await getPermissions();
+                let m = {auditReport:userPermissions?.modules?.reports?.auditReport,order:userPermissions?.modules?.order}
+                setMemoizedPermissions(m);
                 setHasPermission(userPermissions?.modules?.store?.view);
         
                 // If no permission, redirect to dashboard
@@ -65,7 +67,7 @@ const StoreDetails = ()=>{
             };
             
             fetchData();
-          }, [navigate, selectedSalesRepId]);
+          }, [selectedSalesRepId]);
         
           // Check permission and handle redirection
           useEffect(() => {
@@ -74,10 +76,10 @@ const StoreDetails = ()=>{
               navigate("/dashboard"); 
 
             }
-          }, [hasPermission, navigate]);
+          }, [hasPermission]);
     const {isLoaded,data} = account;
     return(<AppLayout>
-        {isLoaded?<StoreDetailCard account={data} brandList={brandList}/>:<LoaderV3 text={"Please wait..."}/>}
+        {isLoaded?<StoreDetailCard account={data} brandList={brandList} memoizedPermissions={memoizedPermissions}/>:<LoaderV3 text={"Please wait..."}/>}
     </AppLayout>)
 }
 export default StoreDetails;

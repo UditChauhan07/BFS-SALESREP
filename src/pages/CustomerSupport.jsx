@@ -25,6 +25,18 @@ const CustomerSupport = () => {
   const [selectedSalesRepId, setSelectedSalesRepId] = useState();
   const [hasPermission, setHasPermission] = useState(null);
   const [permissions, setPermissions] = useState(null);
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const userPermissions = await getPermissions();
+            setPermissions(userPermissions);
+            if (userPermissions?.modules?.customerSupport?.view === false) { PermissionDenied();navigate('/dashboard'); }
+        } catch (error) {
+            console.log("Permission Error", error)
+        }
+    }
+    fetchData()
+}, [])
   let statusList = ["New", "Follow up Needed By Brand Customer Service", "Follow up needed by Rep", "Follow up Needed By Brand Accounting", "Follow up needed by Order Processor", "RTV Approved", "Closed"];
   const [status, setStatus] = useState(["New"]);
   const navigate = useNavigate()
@@ -102,56 +114,7 @@ const CustomerSupport = () => {
     return newValues;
   }, [supportList, retailerFilter, manufacturerFilter, searchBy,status]);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const user = await GetAuthData();
-        setUserData(user);
-        if (!selectedSalesRepId) setSelectedSalesRepId(user.Sales_Rep__c);
-  
-        // Fetch permissions
-        const userPermissions = await getPermissions();
-        setHasPermission(userPermissions?.modules?.customerSupport?.view);
-  
-    
-  
-        // Fetch sales reps if admin
-        if (admins.includes(user.Sales_Rep__c)) {
-          getSalesRepList({ key: user.x_access_token })
-            .then((repRes) => {
-              setSalesRepList(repRes.data);
-            })
-            .catch((repErr) => {
-              console.log({ repErr });
-            });
-        }
-      } catch (err) {
-        console.log({ err });
-      }
-    }
-  
-    fetchData();
-  }, [selectedSalesRepId , navigate]);
-  useEffect(() => {
-    if (hasPermission === false) {
-      navigate("/dashboard"); // Redirect to dashboard if no permission
-      PermissionDenied()
-    }
-  }, [hasPermission, navigate]);
-
-  useEffect(() => {
-    async function fetchPermissions() {
-      try {
-        const user = await GetAuthData(); // Fetch user data
-        const userPermissions = await getPermissions(); // Fetch permissions
-        setPermissions(userPermissions); // Set permissions in state
-      } catch (err) {
-        console.error("Error fetching permissions", err);
-      }
-    }
-
-    fetchPermissions(); // Fetch permissions on mount
-  }, []);
+ 
 
   // Memoize permissions to avoid unnecessary re-calculations
   const memoizedPermissions = useMemo(() => permissions, [permissions]);
@@ -251,6 +214,7 @@ const CustomerSupport = () => {
             manufacturerFilter={manufacturerFilter}
             searchBy={searchBy}
             retailerFilter={retailerFilter}
+            memoizedPermissions={memoizedPermissions}
           />
         )}
         <Pagination

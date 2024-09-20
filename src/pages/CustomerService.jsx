@@ -78,24 +78,22 @@ const CustomerService = () => {
   
         // Fetch permissions for the user
         const permissions = await getPermissions();
-        console.log('Fetched Permissions:', permissions);
+        setPermissions(permissions);
   
         // Check for customer_service permission
         const customerServicePermission = permissions?.modules?.customerSupport?.childModules
-        ?.customer_service?.view ;
-        console.log('Customer Service Permission:', customerServicePermission);
-        setHasPermission(customerServicePermission);
+        ?.customer_service?.create;
   
         // Redirect based on permission
         if (!customerServicePermission) {
           console.log('Redirecting to Dashboard...');
-          navigate("/dashboard");
           PermissionDenied()
+          navigate("/dashboard");
           return; // Ensure no further code execution
         }
   
         // Continue with data fetching if permission is granted
-        await orderListBasedOnRepHandler(user.x_access_token, Reason ? SalesRepId : user.Sales_Rep__c, Reason ? false : true, OrderId);
+        orderListBasedOnRepHandler(user.x_access_token, Reason ? SalesRepId : user.Sales_Rep__c, Reason ? false : true, OrderId);
   
         if (admins.includes(user.Sales_Rep__c)) {
           try {
@@ -111,7 +109,7 @@ const CustomerService = () => {
     };
   
     fetchData();
-  }, [Reason, SalesRepId, OrderId, navigate]);
+  }, [Reason, SalesRepId, OrderId]);
   useEffect(() => {
     if (Reason) {
       setReason(Reason)
@@ -251,23 +249,11 @@ const CustomerService = () => {
       });
   }
 
-  useEffect(() => {
-    async function fetchPermissions() {
-      try {
-        const user = await GetAuthData(); // Fetch user data
-        const userPermissions = await getPermissions(); // Fetch permissions
-        setPermissions(userPermissions); // Set permissions in state
-      } catch (err) {
-        console.error("Error fetching permissions", err);
-      }
-    }
-
-    fetchPermissions(); // Fetch permissions on mount
-  }, []);
   const memoizedPermissions = useMemo(() => permissions, [permissions]);
 
   if (sumitForm) return <AppLayout><Loading height={'50vh'} /></AppLayout>;
   return (<CustomerSupportLayout
+    permissions={permissions}
     filterNodes={
       <>
       {memoizedPermissions?.modules?.godLevel  ? <>

@@ -83,7 +83,22 @@ const AuditReport = () => {
     const [auditReport, setAuditReport] = useState({ isLoaded: false, data: [] })
     const [token, setToken] = useState();
     const [permissions, setPermissions] = useState(null);
+    useEffect(() => {
+        async function fetchPermissions() {
+            try {
+                const userPermissions = await getPermissions(); // Fetch permissions
+                setPermissions(userPermissions); // Set permissions in state
+                if (userPermissions?.modules?.reports?.auditReport.view === false) {
+                    PermissionDenied()
+                    navigate('/dashboard')
+                }
+            } catch (err) {
+                console.error("Error fetching permissions", err);
+            }
+        }
 
+        fetchPermissions(); // Fetch permissions on mount
+    }, []);
     useEffect(() => {
         GetAuthData().then((user) => {
             setToken(user.x_access_token);
@@ -171,30 +186,9 @@ const AuditReport = () => {
                 setLoadingChunk(null);
             }
         };
-        useEffect(() => {
-            async function fetchPermissions() {
-                try {
-                    const user = await GetAuthData(); // Fetch user data
-                    const userPermissions = await getPermissions(); // Fetch permissions
-                    setPermissions(userPermissions); // Set permissions in state
-                    if (userPermissions?.modules?.reports?.auditReport === false) {
-                        navigate('/dashboard')
-                    }
-                } catch (err) {
-                    console.error("Error fetching permissions", err);
-                }
-            }
 
-            fetchPermissions(); // Fetch permissions on mount
-        }, []);
+        
 
-        // Memoize permissions to avoid unnecessary re-calculations
-        const memoizedPermissions = useMemo(() => permissions, [permissions]);
-        useEffect(() => {
-            if (hasPermission === false) {
-                navigate("/dashboard");  // Redirect if no permission
-            }
-        }, [hasPermission, navigate]);
 
         return (
             <div style={styles.optionContainer}>
@@ -314,11 +308,12 @@ const AuditReport = () => {
     return (<AppLayout
         filterNodes={
             <div className="d-flex justify-content-between m-auto" style={{ width: '99%' }}>
+                {permissions?.modules?.reports?.auditReport.create?
                 <button className="border px-2 py-1 leading-tight d-flex" onClick={() => setIsShowBrandModal(true)}>
 
                     <MdOutlineDownload size={16} className="m-auto" />
                     <small style={{ fontSize: '9px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Brand <br />Report</small>
-                </button>
+                </button>:<p></p>}
                 <div>
                     <div className="d-flex gap-4">
                         <FilterItem
