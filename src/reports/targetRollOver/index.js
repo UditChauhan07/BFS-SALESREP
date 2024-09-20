@@ -445,8 +445,7 @@ const TargetReport = () => {
   }, []);
 
 
-  // Memoize permissions to avoid unnecessary re-calculations
-  const memoizedPermissions = useMemo(() => permissions, [permissions]);
+
     return (
         <AppLayout
             filterNodes={
