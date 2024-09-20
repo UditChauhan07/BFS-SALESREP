@@ -15,18 +15,27 @@ import { useNavigate } from "react-router-dom";  // Import the navigate hook
 import PermissionDenied from "../components/PermissionDeniedPopUp/PermissionDenied";
 
 const HelpSection = () => {
+  const navigate = useNavigate(); 
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const userPermissions = await getPermissions()
+            if (userPermissions?.modules?.customerSupport?.childModules?.how_To_Guide?.view === false) { PermissionDenied();navigate('/dashboard'); }
+        } catch (error) {
+            console.log("Permission Error", error)
+        }
+    }
+    fetchData()
+}, [])
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentLink, setCurrentLink] = useState('');
   const [currentType, setCurrentType] = useState('');
   const [currentFileName, setCurrentFileName] = useState('');
-  const [selectedSalesRepId, setSelectedSalesRepId] = useState();
-  const [userData, setUserData] = useState({});
-  const [hasPermission, setHasPermission] = useState(null);  // State for permission check
   const [isDownloadConfirmOpen, setIsDownloadConfirmOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false); // State for spinner
   const [searchTerm, setSearchTerm] = useState("");
   
-  const navigate = useNavigate(); 
+
   const modalRef = useRef(null);
 
   const guides = Object.values(productGuides);
@@ -67,43 +76,6 @@ const HelpSection = () => {
     guide.Categoryname.toLowerCase().includes(searchTerm.toLowerCase()) ||
     guide.filename.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  // Fetch user data and permissions
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const user = await GetAuthData();
-        setUserData(user);
-
-        if (!selectedSalesRepId) {
-          setSelectedSalesRepId(user.Sales_Rep__c);
-        }
-
-        const userPermissions = await getPermissions();
-        setHasPermission(userPermissions?.modules?.customerSupport?.childModules
-          ?.how_To_Guide?.view);
-
-        // If no permission, redirect to dashboard
-        if (userPermissions?.modules?.customerSupport?.childModules
-          ?.how_To_Guide?.view === false) {
-          navigate("/dashboard");
-          PermissionDenied()
-        }
-        
-      } catch (error) {
-        console.log({ error });
-      }
-    };
-    
-    fetchData();
-  }, [navigate, selectedSalesRepId]);
-
-  // Check permission and handle redirection
-  useEffect(() => {
-    if (hasPermission === false) {
-      navigate("/dashboard");  // Redirect if no permission
-    }
-  }, [hasPermission, navigate]);
 
   return (
     <AppLayout

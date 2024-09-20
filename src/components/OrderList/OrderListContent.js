@@ -8,7 +8,8 @@ import { useNavigate } from "react-router-dom";
 import ProductDetails from "../../pages/productDetails";
 import { BiExit, BiSave } from "react-icons/bi";
 import ModalPage from "../Modal UI";
-function OrderListContent({ data, hideDetailedShow = false }) {
+import PermissionDenied from "../PermissionDeniedPopUp/PermissionDenied";
+function OrderListContent({ data, hideDetailedShow = false,memoizedPermissions={} }) {
   const navigate = useNavigate();
   const [Viewmore, setviewmore] = useState(false);
   const [modalData, setModalData] = useState({});
@@ -17,6 +18,8 @@ function OrderListContent({ data, hideDetailedShow = false }) {
   const [accountId, setAccountId] = useState();
   const [manufacturerId, setManufacturerId] = useState();
   const [confirm, setConfirm] = useState({});
+  console.log({memoizedPermissions});
+  
   const months = [
     "January",
     "February",
@@ -208,6 +211,7 @@ function OrderListContent({ data, hideDetailedShow = false }) {
                 <div className={Styles.StatusOrder}>
                   <div className={Styles.Status1}>
                     {!item.Order_Number__c ?
+                    memoizedPermissions?.modules?.customerSupport?.childModules?.order_Status?.create?
                       <h3
                         title="Raise a Support Ticket for this Order on Status"
                         onClick={(e) =>
@@ -219,7 +223,13 @@ function OrderListContent({ data, hideDetailedShow = false }) {
                       >
                         {" "}
                         Request status update
-                      </h3> : <h3
+                      </h3>:<h3
+                        title="Raise a Support Ticket for this Order on Status"
+                        onClick={PermissionDenied} className="pointer-cursor"
+                      >
+                        {" "}
+                        Request status update
+                      </h3> : memoizedPermissions?.modules?.order?.view ? <h3
                         title="Click to see order Status"
                         onClick={(e) => {
                           setModalData(item);
@@ -229,8 +239,15 @@ function OrderListContent({ data, hideDetailedShow = false }) {
                       >
                         {" "}
                         View Order Status
+                      </h3>:<h3
+                        title="Click to see order Status"
+                        onClick={PermissionDenied} className="pointer-cursor"
+                      >
+                        {" "}
+                        View Order Status
                       </h3>}
                     {item?.Attachment && item.Attachment?.length ?
+                    memoizedPermissions?.modules?.order?.view ?
                       <h4
                         title="click to download invoice"
                         onClick={(e) =>
@@ -238,8 +255,14 @@ function OrderListContent({ data, hideDetailedShow = false }) {
                         }
                       >
                         Download Invoice
+                      </h4>:<h4
+                        title="click to download invoice"
+                        onClick={PermissionDenied} className="pointer-cursor"
+                      >
+                        Download Invoice
                       </h4>
                       :
+                      memoizedPermissions?.modules?.customerSupport?.childModules?.order_Status?.create?
                       <h4
                         title="Support Inquiry for this Order on Invoice"
                         onClick={(e) =>
@@ -250,8 +273,14 @@ function OrderListContent({ data, hideDetailedShow = false }) {
                         }
                       >
                         Request invoice
+                      </h4>:<h4
+                        title="Support Inquiry for this Order on Invoice"
+                        onClick={PermissionDenied} className="pointer-cursor"
+                      >
+                        Request invoice
                       </h4>}
                     {!item.Tracking__c ?
+                    memoizedPermissions?.modules?.customerSupport?.childModules?.order_Status?.create?
                       <h4
                         title="Get Help with Tracking Status"
                         onClick={(e) =>
@@ -262,10 +291,22 @@ function OrderListContent({ data, hideDetailedShow = false }) {
                         }
                       >
                         Request tracking number
-                      </h4> : <h4
+                      </h4>:<h4
+                        title="Get Help with Tracking Status"
+                        onClick={PermissionDenied} className="pointer-cursor"
+                      >
+                        Request tracking number
+                      </h4> : 
+                      memoizedPermissions?.modules?.order?.view ?
+                      <h4
                         title="Click to see the tracking status"
                         onClick={(e) => { setModalData(item); setModalType(3) }
                         }
+                      >
+                        View Tracking
+                      </h4>:<h4
+                        title="Click to see the tracking status"
+                        onClick={PermissionDenied} className="pointer-cursor"
                       >
                         View Tracking
                       </h4>}

@@ -101,53 +101,54 @@ const TopNav = () => {
               <div className={styles.vr}></div>
               <p className={`m-0 ${styles.language}`}>EN</p>
               <p className={`m-0 ${styles.language} ${styles.text} flex`}>
-              <div
-  className="dropdown d-flex justify-content-center align-items-center"
-  role="button"
-  data-bs-toggle="dropdown"
-  style={{ zIndex: 1021 }}
->
-  Need Help?&nbsp; <NeedHelp />
-  <ul className="dropdown-menu">
-    {/* order status  */}
-    {memoizedPermissions?.modules?.customerSupport?.childModules?.order_Status?.view ? (
-      <li onClick={() => navigate("/orderStatus")}>
-        <Link
-          to="/order-list"
-          className={`dropdown-item text-start d-flex align-items-center ${styles.nameText} focus:!bg-black active:!bg-black focus:!text-white active:!text-white`}
-        >
-          <OrderStatusIcon width={15} height={15} />
-          &nbsp;Order Status
-        </Link>
-      </li>
-    ) : null}
+                {memoizedPermissions?.modules?.customerSupport?.childModules?.order_Status?.view||memoizedPermissions?.modules?.customerSupport?.childModules?.customer_service?.view||memoizedPermissions?.modules?.customerSupport?.childModules?.how_To_Guide?.view?
+                <div
+                  className="dropdown d-flex justify-content-center align-items-center"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  style={{ zIndex: 1021 }}
+                >
+                  Need Help?&nbsp; <NeedHelp />
+                  <ul className="dropdown-menu">
+                    {/* order status  */}
+                    {memoizedPermissions?.modules?.customerSupport?.childModules?.order_Status?.view ? (
+                      <li onClick={() => navigate("/orderStatus")}>
+                        <Link
+                          to="/order-list"
+                          className={`dropdown-item text-start d-flex align-items-center ${styles.nameText} focus:!bg-black active:!bg-black focus:!text-white active:!text-white`}
+                        >
+                          <OrderStatusIcon width={15} height={15} />
+                          &nbsp;Order Status
+                        </Link>
+                      </li>
+                    ) : null}
 
-    {/* customer services */}
-    {memoizedPermissions?.modules?.customerSupport?.childModules?.customer_service?.view ? (
-      <li onClick={() => navigate("/customerService")}>
-        <Link
-          to="/customerService"
-          className={`dropdown-item text-start d-flex align-items-center ${styles.nameText} focus:!bg-black active:!bg-black focus:!text-white active:!text-white`}
-        >
-          <CustomerServiceIcon width={15} height={15} />
-          &nbsp;Customer Services
-        </Link>
-      </li>
-    ) : null}
+                    {/* customer services */}
+                    {memoizedPermissions?.modules?.customerSupport?.childModules?.customer_service?.view ? (
+                      <li onClick={() => navigate("/customerService")}>
+                        <Link
+                          to="/customerService"
+                          className={`dropdown-item text-start d-flex align-items-center ${styles.nameText} focus:!bg-black active:!bg-black focus:!text-white active:!text-white`}
+                        >
+                          <CustomerServiceIcon width={15} height={15} />
+                          &nbsp;Customer Services
+                        </Link>
+                      </li>
+                    ) : null}
 
-    {/* help section */}
-    {memoizedPermissions?.modules?.customerSupport?.childModules?.how_To_Guide?.view ? (
-      <li onClick={() => navigate("/Help-Section")}>
-        <Link
-          className={`dropdown-item text-start d-flex align-items-center ${styles.nameText} focus:!bg-black active:!bg-black focus:!text-white active:!text-white`}
-        >
-          <RiGuideLine width={15} height={15} />
-          &nbsp;How-To Guides
-        </Link>
-      </li>
-    ) : null}
-  </ul>
-</div>
+                    {/* help section */}
+                    {memoizedPermissions?.modules?.customerSupport?.childModules?.how_To_Guide?.view ? (
+                      <li onClick={() => navigate("/Help-Section")}>
+                        <Link
+                          className={`dropdown-item text-start d-flex align-items-center ${styles.nameText} focus:!bg-black active:!bg-black focus:!text-white active:!text-white`}
+                        >
+                          <RiGuideLine width={15} height={15} />
+                          &nbsp;How-To Guides
+                        </Link>
+                      </li>
+                    ) : null}
+                  </ul>
+                </div>:null}
 
               </p>
             </div>
@@ -159,92 +160,92 @@ const TopNav = () => {
                 </span>
               </p>
               {showSetting && (
-                   
+
                 <>
-                {memoizedPermissions?.modules?.godLevel   ? <>
-                  <div className={styles.vr}></div>
-                  <p className={`m-0 ${styles.nameText}`}>
-                 
-                  <div
-  className="dropdown d-flex justify-content-center align-items-center"
-  role="button"
-  data-bs-toggle="dropdown"
-  style={{ zIndex: 1021 }}
->
-  Admin
-  <ul className="dropdown-menu ">
-    {/* email blast  */}
-    {memoizedPermissions?.modules?.emailBlast?.view ? (
-      <li
-        onClick={() => navigate("/newsletter")}
-        className={`dropdown-item rounded ${styles.nameText} p-1  d-flex align-items-center focus:!bg-black active:!bg-black focus:!text-white active:!text-white hover:bg-[#eeeeef] hover:rounded-lg`}
-        style={{ lineHeight: "15px" }}
-      >
-        <BiMailSend />
-        &nbsp;Email Blast
-      </li>
-    ) : (
-     null
-    )}
+                  {memoizedPermissions?.modules?.godLevel ? <>
+                    <div className={styles.vr}></div>
+                    <p className={`m-0 ${styles.nameText}`}>
 
-    {/* account tier */}
-    {memoizedPermissions?.modules?.reports?.accountTier?.view ? (
-      <li
-        onClick={() => navigate("/TierStanding")}
-        className={`dropdown-item rounded ${styles.nameText} p-1  d-flex align-items-center focus:!bg-black active:!bg-black focus:!text-white active:!text-white hover:bg-[#eeeeef] hover:rounded-lg`}
-        style={{ lineHeight: "15px" }}
-      >
-        <BiStar />
-        &nbsp;Account Tier & Standing Report
-      </li>
-    ) : (
-    null
-    )}
+                      <div
+                        className="dropdown d-flex justify-content-center align-items-center"
+                        role="button"
+                        data-bs-toggle="dropdown"
+                        style={{ zIndex: 1021 }}
+                      >
+                        Admin
+                        <ul className="dropdown-menu ">
+                          {/* email blast  */}
+                          {memoizedPermissions?.modules?.emailBlast?.view ? (
+                            <li
+                              onClick={() => navigate("/newsletter")}
+                              className={`dropdown-item rounded ${styles.nameText} p-1  d-flex align-items-center focus:!bg-black active:!bg-black focus:!text-white active:!text-white hover:bg-[#eeeeef] hover:rounded-lg`}
+                              style={{ lineHeight: "15px" }}
+                            >
+                              <BiMailSend />
+                              &nbsp;Email Blast
+                            </li>
+                          ) : (
+                            null
+                          )}
 
-    {/* audit report */}
-    {memoizedPermissions?.modules?.reports?.auditReport?.view ? (
-      <li
-        onClick={() => navigate("/AuditReport")}
-        className={`dropdown-item rounded ${styles.nameText} p-1 d-flex align-items-center focus:!bg-black active:!bg-black focus:!text-white active:!text-white hover:bg-[#eeeeef] hover:rounded-lg`}
-        style={{ lineHeight: "15px" }}
-      >
-        <BiLogoZoom />
-        &nbsp;Audit Report
-      </li>
-    ) : (
-     null
-    )}
-  </ul>
-</div>
+                          {/* account tier */}
+                          {memoizedPermissions?.modules?.reports?.accountTier?.view ? (
+                            <li
+                              onClick={() => navigate("/TierStanding")}
+                              className={`dropdown-item rounded ${styles.nameText} p-1  d-flex align-items-center focus:!bg-black active:!bg-black focus:!text-white active:!text-white hover:bg-[#eeeeef] hover:rounded-lg`}
+                              style={{ lineHeight: "15px" }}
+                            >
+                              <BiStar />
+                              &nbsp;Account Tier & Standing Report
+                            </li>
+                          ) : (
+                            null
+                          )}
 
-                  </p>
-                 </> : null}
-                 
+                          {/* audit report */}
+                          {memoizedPermissions?.modules?.reports?.auditReport?.view ? (
+                            <li
+                              onClick={() => navigate("/AuditReport")}
+                              className={`dropdown-item rounded ${styles.nameText} p-1 d-flex align-items-center focus:!bg-black active:!bg-black focus:!text-white active:!text-white hover:bg-[#eeeeef] hover:rounded-lg`}
+                              style={{ lineHeight: "15px" }}
+                            >
+                              <BiLogoZoom />
+                              &nbsp;Audit Report
+                            </li>
+                          ) : (
+                            null
+                          )}
+                        </ul>
+                      </div>
+
+                    </p>
+                  </> : null}
+
                 </>
               )}
               <div className={styles.vr}></div>
 
               {/* My orders  */}
               {memoizedPermissions?.modules?.order?.view ?
-              <p className={`m-0 ${styles.nameText}`}>
-              <Link to="/order-list" className="linkStyle">
-                My Orders{" "}
-              </Link>
-            </p>
-              : <p className={`m-0 ${styles.nameText}`} onClick={handleRestrictedAccess}>
-              <Link className="linkStyle"
-              style={{
-                                
-                cursor: "not-allowed",
-                color: "grey",
-              }}
-              >
-                My Orders{" "}
+                <p className={`m-0 ${styles.nameText}`}>
+                  <Link to="/order-list" className="linkStyle">
+                    My Orders{" "}
+                  </Link>
+                </p>
+                : <p className={`m-0 ${styles.nameText}`} onClick={handleRestrictedAccess}>
+                  <Link className="linkStyle"
+                    style={{
 
-                
-              </Link>
-            </p>}
-              
+                      cursor: "not-allowed",
+                      color: "grey",
+                    }}
+                  >
+                    My Orders{" "}
+
+
+                  </Link>
+                </p>}
+
               <div className={styles.vr}></div>
               <p className={`m-0 ${styles.nameText}`}>
                 <Link to="/logout" className="linkStyle">

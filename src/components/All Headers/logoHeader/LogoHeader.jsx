@@ -29,7 +29,7 @@ const LogoHeader = () => {
 
   // Handle restricted access
   const handleRestrictedAccess = () => {
-    PermissionDenied(); 
+    PermissionDenied();
   };
 
   return (
@@ -38,7 +38,7 @@ const LogoHeader = () => {
         {/* My Retailers */}
         <div className={`${styles.lapSetting} d-none-print`}>
           <p className={`m-0  ${styles.language}`}>
-            {memoizedPermissions?.modules?.myRetailers?.view ? (
+            {memoizedPermissions?.modules?.order?.create ? (
               <Link to="/my-retailers" className="linkStyle">
                 My Retailers
               </Link>
@@ -55,7 +55,7 @@ const LogoHeader = () => {
 
           {/* New Arrivals */}
           <p className={`m-0   ${styles.language}`}>
-            {memoizedPermissions?.modules?.newArrivals?.view  ? (
+            {memoizedPermissions?.modules?.newArrivals?.view ? (
               <Link to="/new-arrivals" className="linkStyle">
                 New Arrivals
               </Link>
@@ -72,7 +72,7 @@ const LogoHeader = () => {
 
           {/* Brands */}
           <p className={`m-0   ${styles.language}`}>
-            {memoizedPermissions?.modules?.brands?.view  ? (
+            {memoizedPermissions?.modules?.brands?.view ? (
               <Link to="/brand" className="linkStyle">
                 Brands
               </Link>
@@ -99,17 +99,17 @@ const LogoHeader = () => {
         <div className={`${styles.lapSetting} d-none-print`}>
           {/* Dashboard */}
           <p className={`m-0 w-[100px]  ${styles.language} flex`}>
-              <a href="#search" data-rr-ui-event-key="#search" className=" pr-0 nav-link active"><div className="search-container"><input className="search expandright" id="searchright" type="search" name="" placeholder="Search..." /><label className="button searchbutton" for="searchright"><span className="searchCode">Search...</span> <span className="mglass">
-                <SearchIcon />
-              </span> </label></div></a>
-              {/* <img src={"/assets/images/searchIcon.svg"} alt="img" /> */}
-            </p>
+            <a href="#search" data-rr-ui-event-key="#search" className=" pr-0 nav-link active"><div className="search-container"><input className="search expandright" id="searchright" type="search" name="" placeholder="Search..." /><label className="button searchbutton" for="searchright"><span className="searchCode">Search...</span> <span className="mglass">
+              <SearchIcon />
+            </span> </label></div></a>
+            {/* <img src={"/assets/images/searchIcon.svg"} alt="img" /> */}
+          </p>
           <p className={`m-0  ${styles.language}`}>
-            {memoizedPermissions?.modules?.dashboard?.view ? (
+            {/* {memoizedPermissions?.modules?.dashboard?.view ? ( */}
               <Link to="/dashboard" className="linkStyle">
                 Dashboard
               </Link>
-            ) : (
+            {/* ) : (
               <span
                 onClick={handleRestrictedAccess}
                 className="linkStyle"
@@ -117,26 +117,25 @@ const LogoHeader = () => {
               >
                 Dashboard
               </span>
-            )}
+            )} */}
           </p>
 
           {/* My Bag */}
-        
-        {memoizedPermissions?.modules?.order?.view ? <>
-          <p className={`m-0  ${styles.language}`}>
 
-{orderQuantity ? <Link to="/my-bag" className={`linkStyle`}> My Bag ({orderQuantity})
-</Link> : "My Bag(0)"}
-</p>
-         </> : 
-         <p className={`m-0  ${styles.language}`}  >
+          {memoizedPermissions?.modules?.order?.create ? <>
+            <p className={`m-0  ${styles.language}`}>
+              {orderQuantity ? <Link to="/my-bag" className={`linkStyle`}> My Bag ({orderQuantity})
+              </Link> : "My Bag(0)"}
+            </p>
+          </> :
+            <p className={`m-0  ${styles.language}`} style={{ cursor: "not-allowed", color: "grey" }} onClick={handleRestrictedAccess}>
 
-         {orderQuantity ? <span  className={`linkStyle`} style={{ cursor: "not-allowed", color: "grey" }} onClick={handleRestrictedAccess} > My Bag ({orderQuantity})  
-         </span> : "My Bag(0)"}
-         </p>
-         }
-          
-           
+              {orderQuantity ? <span className={`linkStyle`} > My Bag ({orderQuantity})
+              </span> : "My Bag(0)"}
+            </p>
+          }
+
+
         </div>
       </div>
     </div>

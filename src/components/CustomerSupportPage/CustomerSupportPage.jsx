@@ -6,8 +6,9 @@ import { CustomerServiceIcon, OrderStatusIcon, DefaultSupportIcon, MarketingSupp
 import ModalPage from "../Modal UI";
 import SelectCaseReason from "../CustomerServiceFormSection/SelectCaseReason/SelectCaseReason";
 import BrandManagementModal from "../Brand Management Approval/BrandManagementModal";
+import PermissionDenied from "../PermissionDeniedPopUp/PermissionDenied";
 
-function CustomerSupportPage({ data, PageSize, currentPage, manufacturerFilter, searchBy, retailerFilter }) {
+function CustomerSupportPage({ data, PageSize, currentPage, manufacturerFilter, searchBy, retailerFilter, memoizedPermissions = {} }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [brandManagementModalOpen, setBrandManagementModalOpen] = useState(false);
 
@@ -18,6 +19,7 @@ function CustomerSupportPage({ data, PageSize, currentPage, manufacturerFilter, 
     "Product Damage": "Product Damage",
     "Update Account Info": "Update Account Info",
   };
+
   return (
     <div>
       <div className="">
@@ -35,8 +37,19 @@ function CustomerSupportPage({ data, PageSize, currentPage, manufacturerFilter, 
           <div className="row">
             <div className="col-lg-3 col-md-12 col-sm-12">
               <div className={Styles.supportLeft}>
-                <Link to={"/orderStatus"}>
-                  <div className={`${Styles.supportLeftBox} cardHover`}>
+                {memoizedPermissions?.modules?.customerSupport?.childModules?.order_Status?.create ?
+                  <Link to={"/orderStatus"}>
+                    <div className={`${Styles.supportLeftBox} cardHover`}>
+                      <div className={Styles.supportLeftImg}>
+                        <OrderStatusIcon width={42} height={42} />
+                      </div>
+
+                      <div className={Styles.supportLeftContent}>
+                        <h2>Order Status</h2>
+                        <p>View or Request Invoices and Tracking</p>
+                      </div>
+                    </div>
+                  </Link> : <div className={`${Styles.supportLeftBox} cardHover`} onClick={() => { PermissionDenied() }}>
                     <div className={Styles.supportLeftImg}>
                       <OrderStatusIcon width={42} height={42} />
                     </div>
@@ -45,15 +58,29 @@ function CustomerSupportPage({ data, PageSize, currentPage, manufacturerFilter, 
                       <h2>Order Status</h2>
                       <p>View or Request Invoices and Tracking</p>
                     </div>
-                  </div>
-                </Link>
-                <Link to={"/customerService"}>
+                  </div>}
+                {memoizedPermissions?.modules?.customerSupport?.childModules?.customer_service?.create ?
+                  <Link to={"/customerService"}>
+                    <div
+                      className={`${Styles.supportLeftBox} cardHover`}
+                      style={{ cursor: "pointer" }}
+                    // onClick={() => {
+                    //   setModalOpen(true);
+                    // }}
+                    >
+                      <div className={Styles.supportLeftImg}>
+                        <CustomerServiceIcon width={42} height={42} />
+                      </div>
+                      <div className={Styles.supportLeftContent}>
+                        <h2>Customer Services </h2>
+                        <p>Report order issues or update account</p>
+                      </div>
+                    </div>
+                  </Link> :
                   <div
                     className={`${Styles.supportLeftBox} cardHover`}
                     style={{ cursor: "pointer" }}
-                  // onClick={() => {
-                  //   setModalOpen(true);
-                  // }}
+                    onClick={() => { PermissionDenied() }}
                   >
                     <div className={Styles.supportLeftImg}>
                       <CustomerServiceIcon width={42} height={42} />
@@ -62,13 +89,22 @@ function CustomerSupportPage({ data, PageSize, currentPage, manufacturerFilter, 
                       <h2>Customer Services </h2>
                       <p>Report order issues or update account</p>
                     </div>
-                  </div>
-                </Link>
+                  </div>}
                 {/* Brand Management Approval */}
-                <Link
-                  to={"/brandManagementApproval"}
-                >
-                  <div className={`${Styles.supportLeftBox} cardHover`}>
+                {memoizedPermissions?.modules?.customerSupport?.childModules?.brandManagementApproval?.create ?
+                  <Link
+                    to={"/brandManagementApproval"}
+                  >
+                    <div className={`${Styles.supportLeftBox} cardHover`}>
+                      <div className={Styles.supportLeftImg}>
+                        <DefaultSupportIcon width={42} height={42} />
+                      </div>
+                      <div className={Styles.supportLeftContent}>
+                        <h2>Brand Management Approval </h2>
+                        <p>Effective Management</p>
+                      </div>
+                    </div>
+                  </Link> : <div className={`${Styles.supportLeftBox} cardHover`} onClick={() => { PermissionDenied() }}>
                     <div className={Styles.supportLeftImg}>
                       <DefaultSupportIcon width={42} height={42} />
                     </div>
@@ -76,8 +112,7 @@ function CustomerSupportPage({ data, PageSize, currentPage, manufacturerFilter, 
                       <h2>Brand Management Approval </h2>
                       <p>Effective Management</p>
                     </div>
-                  </div>
-                </Link>
+                  </div>}
 
                 <div>
                   <div className={`${Styles.supportLeftBox} cardHover`}>

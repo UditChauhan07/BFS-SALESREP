@@ -9,6 +9,7 @@ import { CloseButton } from "../lib/svg";
 import { getPermissions } from "../lib/permission";
 import { GetAuthData } from "../lib/store";
 import { useNavigate } from "react-router-dom";
+import PermissionDenied from "../components/PermissionDeniedPopUp/PermissionDenied";
 let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
 const TopProducts = () => {
@@ -22,10 +23,6 @@ const TopProducts = () => {
   const [searchText, setSearchText] = useState();
   const [productImages, setProductImages] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
-  const [selectedSalesRepId, setSelectedSalesRepId] = useState();
-  const [userData, setUserData] = useState({});
-  const [hasPermission, setHasPermission] = useState(null);
-  const [permissions, setPermissions] = useState(null);
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -119,57 +116,17 @@ const TopProducts = () => {
       SearchData({ selectedMonth:month, manufacturerFilter:manufacturerId })
   }
 
-
-    // Fetch user data and permissions
-    useEffect(() => {
-      const fetchData = async () => {
+  useEffect(() => {
+    const fetchData = async () => {
         try {
-          const user = await GetAuthData();
-          setUserData(user);
-  
-          if (!selectedSalesRepId) {
-            setSelectedSalesRepId(user.Sales_Rep__c);
-          }
-  
-          const userPermissions = await getPermissions();
-          setHasPermission(userPermissions?.modules?.topProducts?.view);
-  
-          // If no permission, redirect to dashboard
-          if (userPermissions?.modules?.topProducts?.view === false) {
-            navigate("/dashboard");
-          }
-          
+            const userPermissions = await getPermissions()
+            if (userPermissions?.modules?.topProducts?.view === false) { PermissionDenied();navigate('/dashboard'); }
         } catch (error) {
-          console.log({ error });
+            console.log("Permission Error", error)
         }
-      };
-      
-      fetchData();
-    }, [navigate, selectedSalesRepId]);
-  
-    // Check permission and handle redirection
-    useEffect(() => {
-      if (hasPermission === false) {
-        navigate("/dashboard");  // Redirect if no permission
-      }
-    }, [hasPermission, navigate]);
-
-    useEffect(() => {
-      async function fetchPermissions() {
-        try {
-          const user = await GetAuthData(); // Fetch user data
-          const userPermissions = await getPermissions(); // Fetch permissions
-          setPermissions(userPermissions); // Set permissions in state
-        } catch (err) {
-          console.error("Error fetching permissions", err);
-        }
-      }
-  
-      fetchPermissions(); // Fetch permissions on mount
-    }, []);
-  
-    // Memoize permissions to avoid unnecessary re-calculations
-    const memoizedPermissions = useMemo(() => permissions, [permissions]);
+    }
+    fetchData()
+}, [])
 
   return (
     <AppLayout filterNodes={<>

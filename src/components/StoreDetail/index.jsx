@@ -10,32 +10,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import MapGenerator from "../Map";
 import Chart from "react-apexcharts";
 import { useNavigate } from "react-router-dom";
-import { getPermissions } from "../../lib/permission";
-import PermissionDenied from "../PermissionDeniedPopUp/PermissionDenied";
-const StoreDetailCard = ({ account, brandList }) => {
+
+const StoreDetailCard = ({ account, brandList,memoizedPermissions={} }) => {
     const navigate = useNavigate();
-
-    const [permissions, setPermissions] = useState(null);
-
-    useEffect(() => {
-      async function fetchPermissions() {
-        try {
-          const user = await GetAuthData(); // Fetch user data
-          const userPermissions = await getPermissions(); // Fetch permissions
-          setPermissions(userPermissions); // Set permissions in state
-        } catch (err) {
-          console.error("Error fetching permissions", err);
-        }
-      }
   
-      fetchPermissions(); // Fetch permissions on mount
-    }, []);
-  
-    // Memoize permissions to avoid unnecessary re-calculations
-    const memoizedPermissions = useMemo(() => permissions, [permissions]);
-    const handleRestrictedAccess = () => {
-        PermissionDenied()
-      };
+
     const totalCategories = account.Brands.map((value) => {
         return value?.ManufacturerName__c || "NA";
     })
@@ -188,8 +167,9 @@ const StoreDetailCard = ({ account, brandList }) => {
         localStorage.setItem("shippingMethod", JSON.stringify({ number: element.Shipping_Account_Number__c, method: element.Shipping_Method__c }));
         navigate(`/product`);
     }
+    const doNothing = ()=>{}
     return (<section className={Styles.container}>
-        {fileDownload ? <Loading /> :
+        {fileDownload ? <Loading height={'50vh'}/> :
             <div>
                 <div className={`${Styles.accountHolder} ${Styles.dFlex} flex-column`}>
                     <div className={`d-flex w-[100%]`}>
@@ -223,20 +203,12 @@ const StoreDetailCard = ({ account, brandList }) => {
                                 <p className={`${Styles.webLinkHolder} m-auto`}>More Info</p>
                             </div>
                             <div className={`${Styles.BrandInfoHolder} d-flex flex-column`}>
-                                <p className={Styles.accountLabel}>Brand Audit Report</p>
+                                <p className={Styles.accountLabel}> {memoizedPermissions?.auditReport?.create ?"Brand Audit Report":"Brands"}</p>
 
                                 <div className={`${Styles.brandContainer} d-flex justify-between`}>
                                     <OwlCarousel {...options} style={{ position: 'absolute', top: '45px', left: '5%', width: '90%' }}>
                                         {account.Brands.map((element, index) => (
-                                            <>
-                                            {memoizedPermissions?.modules?.store?.download ?
-                                            
-                                            <p className={Styles.webLinkHolder} onClick={() => AuditHandler(element.ManufacturerId__c, account.Name, element.ManufacturerName__c)} style={{ textAlign: 'center', color: '#3296ED', textDecoration: 'underline', cursor: 'pointer' }} key={index}>{element.ManufacturerName__c}</p>
-                                            : 
-                                            <p className={Styles.webLinkHolder} onClick={() => handleRestrictedAccess()} style={{ textAlign: 'center', color: '#3296ED', textDecoration: 'underline', cursor: 'pointer' }} key={index}>{element.ManufacturerName__c}</p>
-                                            }
-                                            
-                                            </>
+                                            <p className={Styles.webLinkHolder} onClick={() => {memoizedPermissions?.auditReport?.create ? AuditHandler(element.ManufacturerId__c, account.Name, element.ManufacturerName__c) : doNothing() }} style={{ textAlign: 'center', color: '#3296ED', textDecoration: 'underline', cursor: 'pointer' }} key={index}>{element.ManufacturerName__c}</p>
                                         ))}
                                     </OwlCarousel>
                                 </div>
@@ -248,17 +220,18 @@ const StoreDetailCard = ({ account, brandList }) => {
                                     <p className={`${Styles.webLinkHolder} m-auto`}>More Info</p>
                                 </div>
                                 <div className={`${Styles.BrandInfoHolder} d-flex flex-column`}>
-                                    <p className={Styles.accountLabel}>Brand Audit Report</p>
+                                    <p className={Styles.accountLabel}>{memoizedPermissions?.auditReport?.create ? "Brand Audit Report":"Brands"}</p>
 
                                     <div className="m-auto d-flex">
                                         {account.Brands.map((element, index) => (
-                                            <p className={Styles.webLinkHolder} onClick={() => AuditHandler(element.ManufacturerId__c, account.Name, element.ManufacturerName__c)} style={{ textAlign: 'center', color: '#3296ED', textDecoration: 'underline', marginRight: '2rem' }} key={index}>{element.ManufacturerName__c}</p>
+                                            <p className={Styles.webLinkHolder} onClick={() => {memoizedPermissions?.auditReport?.create ? AuditHandler(element.ManufacturerId__c, account.Name, element.ManufacturerName__c):doNothing()}} style={{ textAlign: 'center', color: '#3296ED', textDecoration: 'underline', marginRight: '2rem' }} key={index}>{element.ManufacturerName__c}</p>
                                         ))}
                                     </div>
                                 </div>
                             </div>
                             : null}
                 </div>
+                {memoizedPermissions?.order?.create?
                 <div className={`${Styles.detailsContainer} pb-4`} style={{ borderBottom: '1px solid #ccc' }}>
                     <h3 className={Styles.detailTitleHolder}>Order Now</h3>
                     <div className="d-flex mt-4 gap-4 m-auto">
@@ -266,7 +239,7 @@ const StoreDetailCard = ({ account, brandList }) => {
                             return <div key={brand.id} onClick={() => { orderHandler(brand) }} className={Styles.webLinkHolder} style={{ textAlign: 'center', color: '#3296ED', textDecoration: 'underline', cursor: 'pointer' }}  >{brand.ManufacturerName__c}</div>
                         })}
                     </div>
-                </div>
+                </div>:null}
                 <div className={Styles.detailsContainer}>
                     <h3 className={Styles.detailTitleHolder}>Details</h3>
                     <div className="d-flex mt-4">

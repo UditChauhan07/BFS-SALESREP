@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Page from "../pages/page.module.css";
 import { ArrowRightInBrands } from "../lib/svg";
-const BrandCard = ({ brand, image }) => {
+const BrandCard = ({ brand, image ,createOrder}) => {
   const navigate = useNavigate();
   return (
     <div className={`w-full last:mb-0 mb-4 ${Page.HoverArrow} cardHover`}>
@@ -14,6 +14,7 @@ const BrandCard = ({ brand, image }) => {
             </div>
           </Link>
         ) : null}
+        
         <div
           className="flex justify-between items-start h-full px-[10px]"
           onClick={() => {
@@ -28,10 +29,10 @@ const BrandCard = ({ brand, image }) => {
             // onClick={() => {
             //   if (brand?.Accounds) navigate(`/my-retailers?manufacturerId=${brand.Id}`);
             // }}
-            >
-              <div className="[font-family:'Montserrat-400'] font-normal text-black text-[12px] tracking-[0] leading-[32px] whitespace-nowrap">SHOW RETAILERS</div>
+            >{createOrder?
+              <><div className="[font-family:'Montserrat-400'] font-normal text-black text-[12px] tracking-[0] leading-[32px] whitespace-nowrap">SHOW RETAILERS</div>
               {/* <img src={"/assets/images/ArrowRight.svg"} alt="img" /> */}
-              <ArrowRightInBrands />
+              <ArrowRightInBrands /></>:<p>&nbsp;</p>}
             </button>
           </div>
           <div className="bg-black rounded-full w-[40px] h-[40px] flex justify-center items-center">

@@ -117,20 +117,14 @@ const ComparisonReport = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const user = await GetAuthData();
-        setUserData(user);
-
-        if (!selectedSalesRepId) {
-          setSelectedSalesRepId(user.Sales_Rep__c);
-        }
-
         const userPermissions = await getPermissions();
+        setPermissions(userPermissions)
         setHasPermission(userPermissions?.modules?.reports?.comparisonReport?.view);
 
         // If no permission, redirect to dashboard
         if (userPermissions?.modules?.reports?.comparisonReport?.view === false) {
-          navigate("/dashboard");
           PermissionDenied()
+          navigate("/dashboard");
         }
         
       } catch (error) {
@@ -139,28 +133,6 @@ const ComparisonReport = () => {
     };
     
     fetchData();
-  }, [navigate, selectedSalesRepId]);
-
-  // Check permission and handle redirection
-  useEffect(() => {
-    if (hasPermission === false) {
-      navigate("/dashboard");  // Redirect if no permission
-      PermissionDenied()
-    }
-  }, [hasPermission, navigate]);
-
-  useEffect(() => {
-    async function fetchPermissions() {
-      try {
-        const user = await GetAuthData(); // Fetch user data
-        const userPermissions = await getPermissions(); // Fetch permissions
-        setPermissions(userPermissions); // Set permissions in state
-      } catch (err) {
-        console.error("Error fetching permissions", err);
-      }
-    }
-
-    fetchPermissions(); // Fetch permissions on mount
   }, []);
 
   // Memoize permissions to avoid unnecessary re-calculations

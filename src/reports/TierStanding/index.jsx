@@ -22,9 +22,6 @@ const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sh
 const fileExtension = ".xlsx";
 
 const Tier = () => {
-    const [userData, setUserData] = useState({});
-    const [hasPermission, setHasPermission] = useState(null); 
-    const [selectedSalesRepId, setSelectedSalesRepId] = useState();
     const navigate = useNavigate();
     let date = new Date();
     let dYear = date.getFullYear();
@@ -153,35 +150,19 @@ const Tier = () => {
 useEffect(()=>{
     const fetchData = async()=>{
         try {
-            const user = await GetAuthData()
-            if(!salesRepIdKey) 
-                setSelectedSalesRepId(user.Sales_Rep__c)
             const userPermissions = await getPermissions()
-            setHasPermission(userPermissions?.modules?.reports?.accountTier?.view)
-        if(userPermissions?.modules?.reports?.accountTier?.view=== false){ navigate('/dashboard');  PermissionDenied()
-
+            setPermissions(userPermissions);
+        if(userPermissions?.modules?.reports?.accountTier?.view=== false){ 
+            navigate('/dashboard');  PermissionDenied();
         }
         } catch (error) {
            console.log("Permission Error " , error) 
         }
     }
     fetchData()
-} , [salesRepIdKey , navigate])
+} , [])
 
 
-useEffect(() => {
-    async function fetchPermissions() {
-      try {
-        const user = await GetAuthData(); // Fetch user data
-        const userPermissions = await getPermissions(); // Fetch permissions
-        setPermissions(userPermissions); // Set permissions in state
-      } catch (err) {
-        console.error("Error fetching permissions", err);
-      }
-    }
-
-    fetchPermissions(); // Fetch permissions on mount
-  }, []);
   const memoizedPermissions = useMemo(() => permissions, [permissions]);
     return (
         <AppLayout
