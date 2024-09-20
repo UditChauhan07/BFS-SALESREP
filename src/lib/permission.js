@@ -1,6 +1,6 @@
 
 import { GetAuthData } from "./store";
-
+let userType = "saleRep";
 export const permissionsArray = [
   {
     userType: "superadmin",
@@ -94,7 +94,7 @@ export const permissionsArray = [
     },
   },
   {
-    userType: "salesRep",
+    userType: userType,
     allows: [],
     permissions: {
       modules: {
@@ -288,7 +288,7 @@ export async function getPermissions() {
   }
 
   const salesRepId = authData.Sales_Rep__c;
-  let userType = "saleRep";
+
 
   for (const permission of permissionsArray) {
     if (permission.allows.includes(salesRepId)) {

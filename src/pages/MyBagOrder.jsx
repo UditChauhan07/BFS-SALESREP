@@ -103,7 +103,6 @@ function MyBagOrder(props) {
       finalData.push(totalQty)
       finalData.push(totalPrice)
       if (data?.Order_Number__c) finalData.push(orderNumberDetail)
-      if (data?.Order_Number__c) finalData.push(orderNumberDetail)
       if (data?.Tracking__c) finalData.push(trackingumberDetail)
       let productHeaderDetail = { "": "Product Name", " ": "Product Code", "  ": "Product Qty", "   ": "Product Price" }
       if (data?.OpportunityLineItems?.length > 0) finalData.push(productHeaderDetail)

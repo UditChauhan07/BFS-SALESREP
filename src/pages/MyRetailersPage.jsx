@@ -1,4 +1,4 @@
-import React, { useEffect, useState , useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import MyRetailers from "../components/My Retailers/MyRetailers";
 import { FilterItem } from "../components/FilterItem";
 import { useManufacturer } from "../api/useManufacturer";
@@ -39,10 +39,6 @@ const MyRetailersPage = () => {
         setUserData(user);
         if (!selectedSalesRepId) setSelectedSalesRepId(user.Sales_Rep__c);
 
-        // Fetch permissions
-        const userPermissions = await getPermissions();
-        setHasPermission(userPermissions?.modules?.order?.create);
-
         // Fetch retailer list
         getRetailerListHandler({ key: user.x_access_token, userId: selectedSalesRepId ?? user.Sales_Rep__c });
 
@@ -61,13 +57,7 @@ const MyRetailersPage = () => {
     fetchData();
   }, [selectedSalesRepId]);
 
-  useEffect(() => {
-    if (hasPermission === false) {
-      PermissionDenied()
-      navigate("/dashboard"); // Redirect to dashboard if no permission
-      PermissionDenied()
-    }
-  }, [hasPermission]);
+
 
   const getRetailerListHandler = ({ key, userId }) => {
     setRetailerList({ data: [], isLoading: true });
@@ -85,7 +75,13 @@ const MyRetailersPage = () => {
       try {
         const user = await GetAuthData(); // Fetch user data
         const userPermissions = await getPermissions(); // Fetch permissions
+        console.log({userPermissions});
+        
         setPermissions(userPermissions); // Set permissions in state
+        if (userPermissions?.modules?.order?.create === false) {
+          PermissionDenied();
+          navigate('/dashboard')
+        }
       } catch (err) {
         console.error("Error fetching permissions", err);
       }
@@ -101,21 +97,21 @@ const MyRetailersPage = () => {
     <AppLayout
       filterNodes={
         <>
-        {memoizedPermissions?.modules?.godLevel  ? 
-         <>
-          <FilterItem
-        minWidth="220px"
-        label="salesRep"
-        name="salesRep"
-        value={selectedSalesRepId}
-        options={salesRepList.map((salesRep) => ({
-          label: salesRep.Id ==userData.Sales_Rep__c?'My Retailers ('+salesRep.Name+')':salesRep.Name,
-          value: salesRep.Id,
-        }))}
-        onChange={(value) => salesRepHandler(value)}
-      />
-       </>  : null}
-        
+          {memoizedPermissions?.modules?.godLevel ?
+            <>
+              <FilterItem
+                minWidth="220px"
+                label="salesRep"
+                name="salesRep"
+                value={selectedSalesRepId}
+                options={salesRepList.map((salesRep) => ({
+                  label: salesRep.Id == userData.Sales_Rep__c ? 'My Retailers (' + salesRep.Name + ')' : salesRep.Name,
+                  value: salesRep.Id,
+                }))}
+                onChange={(value) => salesRepHandler(value)}
+              />
+            </> : null}
+
           <FilterItem
             label="Sort by"
             value={sortBy}
@@ -158,19 +154,19 @@ const MyRetailersPage = () => {
               setManufacturerFilter(null);
               setSearchBy("");
               setSelectedSalesRepId(userData.Sales_Rep__c);
-              getRetailerListHandler({key:userData.x_access_token,userId:userData.Sales_Rep__c})
+              getRetailerListHandler({ key: userData.x_access_token, userId: userData.Sales_Rep__c })
             }}
           >
             <CloseButton crossFill={'#fff'} height={20} width={20} />
-            <small style={{ fontSize: '6px',letterSpacing: '0.5px',textTransform:'uppercase'}}>clear</small>
+            <small style={{ fontSize: '6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>clear</small>
           </button>
-        
+
 
         </>
       }
     >
       <MyRetailers
-        pageData={retailerList?.data||[]}
+        pageData={retailerList?.data || []}
         sortBy={sortBy}
         searchBy={searchBy}
         isLoading={retailerList.isLoading}
@@ -178,8 +174,8 @@ const MyRetailersPage = () => {
         filterBy={
           manufacturerFilter
             ? manufacturers?.data?.find(
-                (manufacturer) => manufacturer.Id === manufacturerFilter
-              )
+              (manufacturer) => manufacturer.Id === manufacturerFilter
+            )
             : null
         }
       />

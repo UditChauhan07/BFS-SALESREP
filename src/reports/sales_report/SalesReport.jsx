@@ -220,20 +220,6 @@ const SalesReport = () => {
   };
   const navigate = useNavigate();
 
-// permision set 
-useEffect(() => {
-  async function fetchPermissions() {
-    try {
-      const user = await GetAuthData(); // Fetch user data
-      const userPermissions = await getPermissions(); // Fetch permissions
-      setPermissions(userPermissions); // Set permissions in state
-    } catch (err) {
-      console.error("Error fetching permissions", err);
-    }
-  }
-
-  fetchPermissions(); // Fetch permissions on mount
-}, []);
 
 // Memoize permissions to avoid unnecessary re-calculations
 const memoizedPermissions = useMemo(() => permissions, [permissions]);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState , useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import AppLayout from "../components/AppLayout";
 import LaunchCalendar from "../components/LaunchCalendar/LaunchCalendar";
 import { FilterItem } from "../components/FilterItem";
@@ -124,7 +124,7 @@ const MarketingCalendar = () => {
   }
 
   const { data: manufacturers } = useManufacturer();
-  const generatePdfServerSide = (version=0) => {
+  const generatePdfServerSide = (version = 0) => {
     setPDFIsloaed(true);
     LoadingEffect();
     GetAuthData().then((user) => {
@@ -148,7 +148,7 @@ const MarketingCalendar = () => {
         }).catch((pdfErr) => {
           console.log({ pdfErr });
         })
-      }else if (version == 2) {
+      } else if (version == 2) {
         getMarketingCalendarPDFV3({ key: user.x_access_token, manufacturerId, month }).then((file) => {
           if (file) {
             const a = document.createElement('a');
@@ -167,7 +167,7 @@ const MarketingCalendar = () => {
           console.log({ pdfErr });
         })
       }
-       else {
+      else {
         getMarketingCalendarPDF({ key: user.x_access_token, manufacturerId, month }).then((file) => {
           if (file) {
             const a = document.createElement('a');
@@ -196,35 +196,23 @@ const MarketingCalendar = () => {
     const filteredProductList = productList.map((monthData) => {
       // Check if content is available for the month
       if (!monthData.content || !monthData.content.length) return null;
-  
+
       const filteredContent = monthData.content.filter((item) => {
-        const itemMonth = item.Launch_Date__c ? item.Launch_Date__c.split("-")[1].toUpperCase() : null;
         const itemBrand = item.ManufacturerName__c;
-  
+        
         // Check for brand and month match
         const brandMatch = brand ? itemBrand === brand : true;
-        const monthMatch = month ? itemMonth === month : true;
-  
-        return brandMatch && monthMatch;
+        return brandMatch;
       });
-  
+
       // Return the filtered content with month information
       return filteredContent.length > 0 ? { ...monthData, content: filteredContent } : null;
-    }).filter(monthData => monthData !== null);
-  
-    // Log filtered data for debugging
-    console.log("Filtered Product List:", filteredProductList);
-  
-    // Step 2: Check if the list is not empty, if empty show an alert or console log
-    if (!filteredProductList.length) {
-      alert("No data available for the selected filters.");
-      return;
-    }
-  
-    // Step 3: Convert the filtered data to Excel format
+    }).filter(monthData => month ? monthData?.month?.toUpperCase() === month:true);
+
+
     exportToExcel({ list: filteredProductList });
   };
-  
+
   // Modified csvData function to map filtered data to proper Excel format
   const csvData = ({ data }) => {
     let finalData = [];
@@ -235,10 +223,10 @@ const MarketingCalendar = () => {
         temp["Product Title"] = item.Name;
         temp["Product Description"] = item.Description;
         temp["Product Size"] = item.Size_Volume_Weight__c;
-        temp["Product Ship Date"] = item.Ship_Date__c 
+        temp["Product Ship Date"] = item.Ship_Date__c
           ? `${item.Ship_Date__c.split("-")[2] === '15' ? 'TBD' : item.Ship_Date__c.split("-")[2]}/${monthNames[parseInt(item.Ship_Date__c.split("-")[1], 10) - 1].toUpperCase()}/${item.Ship_Date__c.split("-")[0]}`
           : 'NA';
-        temp["OCD Date"] = item.Launch_Date__c 
+        temp["OCD Date"] = item.Launch_Date__c
           ? `${item.Launch_Date__c.split("-")[2]}/${monthNames[parseInt(item.Launch_Date__c.split("-")[1], 10) - 1].toUpperCase()}/${item.Launch_Date__c.split("-")[0]}`
           : 'NA';
         temp["Product Brand"] = item.ManufacturerName__c;
@@ -248,7 +236,7 @@ const MarketingCalendar = () => {
     });
     return finalData;
   };
-  
+
   // Modified exportToExcel function to handle filtered list
   const exportToExcel = ({ list }) => {
     const ws = XLSX.utils.json_to_sheet(csvData({ data: list }));
@@ -261,24 +249,24 @@ const MarketingCalendar = () => {
     }
     FileSaver.saveAs(data, `${filename} ${new Date().toISOString()}` + fileExtension);
   };
-  
+
   useEffect(() => {
     const fetchData = async () => {
-        try {
-            const userPermissions = await getPermissions()
-            if (userPermissions?.modules?.marketingCalender?.view === false) { PermissionDenied();navigate('/dashboard'); }
-        } catch (error) {
-            console.log("Permission Error", error)
-        }
+      try {
+        const userPermissions = await getPermissions()
+        if (userPermissions?.modules?.marketingCalender?.view === false) { PermissionDenied(); navigate('/dashboard'); }
+      } catch (error) {
+        console.log("Permission Error", error)
+      }
     }
     fetchData()
-}, [])
+  }, [])
   return (
     <AppLayout
       filterNodes={
         <>
-  
-        
+
+
           <FilterItem
             minWidth="220px"
             label="All Brands"
@@ -342,13 +330,13 @@ const MarketingCalendar = () => {
               </li>
             </ul>
           </div>
-       
-       
+
+
         </>
       }
     >
-      {isPDFLoaded ? <div><img src="https://i.giphy.com/7jtU9sxHNLZuv8HZCa.webp" style={{margin:'auto',mixBlendMode:'luminosity'}} width="480" height="480" /><p className="text-center mt-2">{`Generating PDF`}</p></div> :
-        isLoaded ? <LaunchCalendar brand={brand} month={month} productList={productList} /> : <Loading height={'50vh'}/>}
+      {isPDFLoaded ? <div><img src="https://i.giphy.com/7jtU9sxHNLZuv8HZCa.webp" style={{ margin: 'auto', mixBlendMode: 'luminosity' }} width="480" height="480" /><p className="text-center mt-2">{`Generating PDF`}</p></div> :
+        isLoaded ? <LaunchCalendar brand={brand} month={month} productList={productList} /> : <Loading height={'50vh'} />}
 
     </AppLayout>
   );

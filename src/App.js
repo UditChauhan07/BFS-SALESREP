@@ -72,6 +72,7 @@ function App() {
             <Route path="/" element={<Login />}></Route>
             <Route path="/logout" element={<Logout />}></Route>
             <Route path="/my-retailers" element={<MyRetailersPage />}></Route>
+            {/* need to check */}
             <Route path="/dashboard" element={<Dashboard />}></Route>
             <Route path="/product" element={<Product/>}></Route>
             {/* <Route path="/product/:name" element={<ProductDetails/>}></Route> */}
