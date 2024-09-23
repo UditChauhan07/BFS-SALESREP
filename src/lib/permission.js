@@ -80,7 +80,7 @@ export const permissionsArray = [
             view: true, //check
           },
           contactDetailedReport: {
-            view: false, //off
+            view: true, //off
           },
           accountTier: {
             view: true, //check
