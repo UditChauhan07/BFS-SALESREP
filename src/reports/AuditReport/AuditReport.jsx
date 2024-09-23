@@ -268,14 +268,14 @@ const AuditReport = () => {
     }
 
     const filteredData = useMemo(() => {
-        // Return all data if no filter values
+        // Return all data if no filter values are present
         if (!searchBy && !manufacturerFilter) {
             return auditReport.data;
         }
     
         return auditReport.data?.map((report) => {
             let matchesSearch = true;
-            let filteredBrands = [];
+            let filteredBrands = report.Brands || []; // Ensure we handle the case where there are no brands
     
             // Check if searchBy matches Name or Owner.Name
             if (searchBy) {
@@ -283,25 +283,27 @@ const AuditReport = () => {
                     report?.Name?.toLowerCase().includes(searchBy.toLowerCase()) ||
                     report?.Owner?.Name?.toLowerCase().includes(searchBy.toLowerCase());
             }
+            
     
             // Filter Brands based on manufacturerFilter
             if (manufacturerFilter) {
-                filteredBrands = report?.Brands?.filter(
+                filteredBrands = filteredBrands.filter(
                     (brand) => brand.ManufacturerId__c === manufacturerFilter
                 );
             }
     
-            // If there are matching brands and search term matches, return only those brands
-            if (matchesSearch && filteredBrands.length > 0) {
+            // If the report matches the search or has filtered brands, return the report
+            if (matchesSearch && (filteredBrands.length > 0 || !manufacturerFilter)) {
                 return {
                     ...report,
-                    Brands: filteredBrands,  // Return only the filtered brands
+                    Brands: filteredBrands.length > 0 ? filteredBrands : report.Brands,  // Return filtered brands or all brands if no manufacturerFilter
                 };
             }
     
-            return null; // Return null if no match
+            return null; // Return null if neither search nor manufacturer filter matches
         }).filter(report => report); // Remove any null reports
     }, [auditReport, manufacturerFilter, searchBy]);
+    
         
 
 
