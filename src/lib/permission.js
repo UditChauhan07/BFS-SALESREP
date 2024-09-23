@@ -171,7 +171,7 @@ export const permissionsArray = [
             view: true, //check
           },
           contactDetailedReport: {
-            view: false, //off
+            view: true, //off
           },
           accountTier: {
             view: false, //check
@@ -262,7 +262,7 @@ export const permissionsArray = [
             view: false, //check
           },
           contactDetailedReport: {
-            view: false, //off
+            view: true , //off
           },
           accountTier: {
             view: false, //check
