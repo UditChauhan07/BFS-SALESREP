@@ -744,8 +744,8 @@ const MultiStepForm = () => {
                                             </div>
                                             <div
                                                 className={`${Styles.templateHolder} ${formData.template == 3 ? Styles.selected : ''}`}
-                                                // onClick={() => handleChange({ target: { value: 3, name: "template" } })}
-                                                onClick={() => { setCallbackError(true); setCallbackErrorMsg('Comming soon...') }}
+                                                onClick={() => handleChange({ target: { value: 3, name: "template" } })}
+                                                // onClick={() => { setCallbackError(true); setCallbackErrorMsg('Comming soon...') }}
                                             >
                                                 <input
                                                     type="radio"
@@ -768,8 +768,8 @@ const MultiStepForm = () => {
                                             </div>
                                             <div
                                                 className={`${Styles.templateHolder} ${formData.template == 4 ? Styles.selected : ''}`}
-                                                // onClick={() => handleChange({ target: { value: 4, name: "template" } })}
-                                                onClick={() => { setCallbackError(true); setCallbackErrorMsg('Comming soon...') }}
+                                                onClick={() => handleChange({ target: { value: 4, name: "template" } })}
+                                                // onClick={() => { setCallbackError(true); setCallbackErrorMsg('Comming soon...') }}
                                             >
                                                 <input
                                                     type="radio"
