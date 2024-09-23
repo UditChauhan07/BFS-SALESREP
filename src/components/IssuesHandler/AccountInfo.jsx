@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { BiUpload } from "react-icons/bi";
 import { uploadFileSupport } from "../../lib/store";
 import ModalPage from "../Modal UI";
-const AccountInfo = ({ reason, typeId, Accounts, postSupportAny, GetAuthData, setSubmitForm }) => {
+const AccountInfo = ({ reason, typeId, Accounts, postSupportAny, GetAuthData, setSubmitForm,salesRepId }) => {
     const navigate = useNavigate();
     const [contactList, setContactList] = useState([]);
     const [brandList, setBrandList] = useState([]);
@@ -70,7 +70,7 @@ const AccountInfo = ({ reason, typeId, Accounts, postSupportAny, GetAuthData, se
                         orderStatusForm: {
                             typeId,
                             reason,
-                            salesRepId: user.Sales_Rep__c,
+                            salesRepId: salesRepId??user.Sales_Rep__c,
                             accountId: values.account?.value,
                             contactId: values.contact?.value,
                             manufacturerId:values.manufacturer.value,

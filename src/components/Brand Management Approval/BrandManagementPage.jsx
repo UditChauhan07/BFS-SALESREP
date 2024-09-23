@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import AccountInfo from "../IssuesHandler/AccountInfo";
 
 
-const BrandManagementPage = ({ accountList,setSubmitForm }) => {
+const BrandManagementPage = ({ accountList,setSubmitForm,salesRepId }) => {
     const navigate = useNavigate();
     const reasons = [{ name: "RTV Request", icon: '/assets/request.png', desc: "" }, { name: "Other", icon: '/assets/Other.png', desc: "" }];
     const [reason, setReason] = useState();
@@ -19,11 +19,10 @@ const BrandManagementPage = ({ accountList,setSubmitForm }) => {
         return data;
     }
 
-
     return (
         <section>
             <BMAIHandler reasons={reasons} reason={reason} setReason={setReason} resetHandler={resetHandler} />
-            {reason && <AccountInfo reason={reason} Accounts={accountList} postSupportAny={postSupportAny} GetAuthData={GetAuthData} setSubmitForm={setSubmitForm} typeId={"0123b000000GfOEAA0"} />}
+            {reason && <AccountInfo reason={reason} Accounts={accountList} postSupportAny={postSupportAny} GetAuthData={GetAuthData} setSubmitForm={setSubmitForm} typeId={"0123b000000GfOEAA0"} salesRepId={salesRepId}/>}
         </section>
     )
 }
