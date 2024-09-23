@@ -37,8 +37,8 @@ const CustomerSupport = () => {
     }
     fetchData()
 }, [])
-  let statusList = ["New", "Follow up Needed By Brand Customer Service", "Follow up needed by Rep", "Follow up Needed By Brand Accounting", "Follow up needed by Order Processor", "RTV Approved", "Closed"];
-  const [status, setStatus] = useState(["New"]);
+  let statusList = ["Open","New", "Follow up Needed By Brand Customer Service", "Follow up needed by Rep", "Follow up Needed By Brand Accounting", "Follow up needed by Order Processor", "RTV Approved", "Closed"];
+  const [status, setStatus] = useState(["Open"]);
   const navigate = useNavigate()
   useEffect(() => {
     GetAuthData()
@@ -100,7 +100,11 @@ const CustomerSupport = () => {
   const filteredData = useMemo(() => {
     let newValues = supportList;
     if (status.length > 0) {
-      newValues = newValues.filter((item) => status.includes(item.Status));
+      if(status == ["Open"]){
+        newValues = newValues.filter((item) => !"Approved".includes(item.Status)&&!"Closed".includes(item.Status));
+      }else{
+        newValues = newValues.filter((item) => status.includes(item.Status));
+      }
     }
     if (manufacturerFilter) {
       newValues = newValues.filter((item) => item.ManufacturerId__c === manufacturerFilter);
@@ -187,6 +191,7 @@ const CustomerSupport = () => {
               setSupportList([]);
               setLoaded(false);
               setRetailerList([]);
+              setStatus(["Open"]);
               setbrandList([])
               setSelectedSalesRepId(userData.Sales_Rep__c)
               supportHandler({ key: userData.x_access_token, salesRepId: userData.Sales_Rep__c })
