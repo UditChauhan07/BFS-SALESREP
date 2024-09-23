@@ -87,7 +87,7 @@ const BMAIssues = () => {
                 
             }>
             {!loaded ? <Loading height={'50vh'} /> :
-                <BrandManagementPage setSubmitForm={setSubmitForm} accountList={accountList} />}
+                <BrandManagementPage setSubmitForm={setSubmitForm} accountList={accountList} salesRepId={selectedSalesRepId}/>}
         </CustomerSupportLayout>
     )
 }
