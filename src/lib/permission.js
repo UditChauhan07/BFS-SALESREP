@@ -275,6 +275,97 @@ export const permissionsArray = [
       },
     },
   },
+  {
+    userType: "None manager",
+    allows: ["0053b00000CwOnLAAV"],
+    permissions: {
+      modules: {
+        godLevel: false, //check
+        store: {
+          view: false  //check
+        },
+        order: {
+          view: false, //check
+          create: false, //check
+        },
+        emailBlast: {
+          view: false, //check but work on
+          create: false,
+        },
+        newArrivals: {
+          view: false, // check
+        },
+        brands: {
+          view: false // check
+        },
+        dashboard: {
+          view: false,
+          redirect: false
+        },
+        topProducts: {
+          view: false, // check
+          create: false,
+        },
+        marketingCalender: {
+          view: false, //check
+          create: false,
+        },
+        educationCenter: {
+          view: false,
+          create: false,
+        },
+        customerSupport: {
+          view: false, //check
+          create: false,
+          childModules: {
+            order_Status: {
+              view: false,
+              create: false //check
+            },
+            customer_service: {
+              view: false,
+              create: false //check
+            },
+            brandManagementApproval: {
+              view: false,
+              create: false //check
+            },
+            how_To_Guide: {
+              view: false, //check
+            }
+          },
+        },
+        reports: {
+          hasAccess: false,
+          salesReport: {
+            view: false, //check
+          },
+          newnessReport: {
+            view: false, //check
+          },
+          comparisonReport: {
+            view: false, //check
+          },
+          yearlyComparisonReport: {
+            view: false, //check
+          },
+          targetReport: {
+            view: false, //check
+          },
+          contactDetailedReport: {
+            view: false , //off
+          },
+          accountTier: {
+            view: false, //check
+          },
+          auditReport: {
+            view: false, //check
+            create: false //check
+          },
+        },
+      },
+    },
+  },
 ];
 
 
