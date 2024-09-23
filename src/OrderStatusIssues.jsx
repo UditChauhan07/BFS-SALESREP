@@ -241,6 +241,7 @@ const OrderStatusIssues = () => {
                                     hideDetailedShow
                                     setSearchShipBy={setSearchShipBy}
                                     searchShipBy={searchShipBy}
+                                    memoizedPermissions = {memoizedPermissions}
                                 />
                             </div>
                             <Pagination
