@@ -25,10 +25,6 @@ const MarketingCalendar = () => {
   const [isPDFLoaded, setPDFIsloaed] = useState(false);
   const [pdfLoadingText, setPdfLoadingText] = useState(".");
   const [productList, setProductList] = useState([]);
-  const [selectedSalesRepId, setSelectedSalesRepId] = useState();
-  const [userData, setUserData] = useState({});
-  const [hasPermission, setHasPermission] = useState(null);
-  const [permissions, setPermissions] = useState(null);
   const navigate = useNavigate()
   let brands = [
     { value: null, label: "All" },
