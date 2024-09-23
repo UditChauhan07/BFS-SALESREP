@@ -9,8 +9,8 @@ import ProductDetails from "../../pages/productDetails";
 import { BiExit, BiSave } from "react-icons/bi";
 import ModalPage from "../Modal UI";
 import PermissionDenied from "../PermissionDeniedPopUp/PermissionDenied";
-function OrderListContent({ data, hideDetailedShow = false,memoizedPermissions = {} }) {
 
+function OrderListContent({ data, hideDetailedShow = false,memoizedPermissions = {} }) {
   const navigate = useNavigate();
   const [Viewmore, setviewmore] = useState(false);
   const [modalData, setModalData] = useState({});
