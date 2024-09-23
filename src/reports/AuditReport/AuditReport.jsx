@@ -304,7 +304,10 @@ const AuditReport = () => {
         }).filter(report => report); // Remove any null reports
     }, [auditReport, manufacturerFilter, searchBy]);
     
-        
+        useEffect(()=>{},[searchBy])
+        const reset = ()=>{
+            setSearchBy(""); setManufacturerFilter();
+        }
 
 
     return (<AppLayout
@@ -330,7 +333,7 @@ const AuditReport = () => {
                             onChange={(value) => setManufacturerFilter(value)}
                         />
                         <FilterSearch onChange={(e) => setSearchBy(e.target.value)} value={searchBy} placeholder={"Search by account"} minWidth={"167px"} />
-                        <button className="border px-2 py-1 leading-tight d-grid" onClick={() => { setSearchBy(); setManufacturerFilter(); }}>
+                        <button className="border px-2 py-1 leading-tight d-grid" onClick={reset}>
                             <CloseButton crossFill={'#fff'} height={20} width={20} />
                             <small style={{ fontSize: '6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>clear</small>
                         </button>
