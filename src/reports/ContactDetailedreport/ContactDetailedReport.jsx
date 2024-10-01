@@ -17,6 +17,7 @@ function ContactDetailedReport() {
     const navigate = useNavigate();
     const [accountManufacturerRecords, setAccountManufacturerRecords] = useState([]);
     const [filteredRecords, setFilteredRecords] = useState([]);
+    const [activeAccounts, setActiveAccounts] = useState("Active Account");
     const [filters, setFilters] = useState({
         accountFilter: '',
         saleRepFilter: '',
@@ -68,30 +69,33 @@ function ContactDetailedReport() {
     }, []);
 
     // Filter records based on the search criteria
-    useEffect(() => {
-        const newFilteredRecords = accountManufacturerRecords.filter(record => {
+    const filteredData = useMemo(() => {
+        return accountManufacturerRecords.filter(record => {
             const accountMatch = debouncedFilters.accountFilter
                 ? record.accountDetails?.Name?.toLowerCase().includes(debouncedFilters.accountFilter.toLowerCase())
                 : true;
+    
             const saleRepMatch = debouncedFilters.saleRepFilter
                 ? record.manufacturers?.[0]?.salesRep?.toLowerCase().includes(debouncedFilters.saleRepFilter.toLowerCase())
                 : true;
+    
             const manufacturerMatch = debouncedFilters.manufacturerFilter
                 ? record.manufacturers?.[0]?.manufacturerName?.toLowerCase().includes(debouncedFilters.manufacturerFilter.toLowerCase())
                 : true;
-            
-const accountStatusMatch = filters.accountStatusFilter === 'All'
-? true // If 'All' is selected, show all accounts
-: filters.accountStatusFilter === 'Active Account'
-    ? record.accountDetails?.Active_Closed__c === 'Active Account' // Show only active accounts
-    : false;
-
-            return  accountStatusMatch &&  manufacturerMatch && saleRepMatch && accountStatusMatch && accountMatch;
+    
+            const accountStatusMatch = filters.accountStatusFilter === 'All'
+                ? true 
+                : filters.accountStatusFilter === 'Active Account'
+                    ? record.accountDetails?.Active_Closed__c === 'Active Account' // Show only active accounts
+                    : false;
+    
+            return accountStatusMatch && manufacturerMatch && saleRepMatch && accountMatch;
         });
-        setFilteredRecords(newFilteredRecords);
-        console.log('filtered record'  , newFilteredRecords)
-    }, [debouncedFilters, accountManufacturerRecords]);
-
+    }, [debouncedFilters, accountManufacturerRecords, filters  ]);
+    useEffect(() => {
+        setFilteredRecords(filteredData);
+        console.log('filtered records', filteredRecords);
+    }, [filteredData]);
     const handleFilterChange = (filterType, value) => {
         setFilters(prev => ({ ...prev, [filterType]: value }));
     };
@@ -107,17 +111,17 @@ const accountStatusMatch = filters.accountStatusFilter === 'All'
     };
 
     const handleExportToExcel = () => {
-        const exportData = filteredRecords.map(record => ({
+        const exportData = filteredData.map(record => ({
             'Account Name': record.accountDetails?.Name || '',
             'First Name': record.contact?.FirstName || 'N/A',
             'Last Name': record.contact?.LastName || 'N/A',
-            'Sales Rep': record.Sales_Rep__r?.Name || 'N/A',
-            'Manufacturer': record.manufacturers?.ManufacturerName__c || 'N/A',
+            'Sales Rep':record.manufacturers?.[0]?.salesRep || 'N/A',
+            'Manufacturer': record.manufacturers?.[0]?.manufacturerName || 'N/A',
             'Email': record.contact?.Email || 'N/A',
             'Phone': record.contact?.Phone || 'N/A',
-            'Account Number': record.Account_Number__c || 'N/A',
-            'Margin': record.Margin__c || 'N/A',
-            'Payment Type': record.Payment_Type__c || 'N/A',
+            'Account Number': record.manufacturers?.[0]?.accountNumber || 'N/A',
+            'Margin': record.manufacturers?.[0]?.margin || 'N/A',
+            'Payment Type': record.manufacturers?.[0]?.paymentType  || 'N/A',
             'Store Street': record.accountDetails?.Store_Street__c || 'N/A',
             'Store City': record.accountDetails?.Store_City__c || 'N/A',
             'Store State': record.accountDetails?.Store_State__c || 'N/A',
@@ -198,6 +202,14 @@ const accountStatusMatch = filters.accountStatusFilter === 'All'
             </>
         }
         >
+             <div className={Styles.inorderflex}>
+        <div>
+          <h2>
+          Account Contact Detailed Report 
+          </h2>
+        </div>
+        <div></div>
+      </div>
             {loading ? (
                 <Loading />
             ) : (
@@ -207,53 +219,53 @@ const accountStatusMatch = filters.accountStatusFilter === 'All'
                             <table className="table table-responsive" style={{ minHeight: "300px" }}>
                                 <thead>
                                     <tr>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Account Name</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}> Sales Rep</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Manufacturer</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Status</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>First Name </th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Last Name</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Account Name</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}  ${styles.stickySecondColumnHeading} `} style={{ minWidth: "200px" }}> Sales Rep</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Manufacturer</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Status</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>First Name </th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Last Name</th>
                                         
                                      
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Email</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Phone</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Account Number</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Email</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Phone</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Account Number</th>
                                        
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Margin</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Payment Type</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Store Street</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Store City</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Store State</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Store Zip</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Store Country</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Shipping Street</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Shipping City</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth} `} style={{ minWidth: "200px" }}>Margin</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Payment Type</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Store Street</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Store City</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Store State</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Store Zip</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Store Country</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Shipping Street</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Shipping City</th>
 
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Shipping State</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Shipping  Zip</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Shipping Country</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Billing street</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Billing City </th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Billing State</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Billing  Zip</th>
-                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Billing Country</th>
+                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Shipping State</th>
+                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Shipping  Zip</th>
+                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Shipping Country</th>
+                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing street</th>
+                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing City </th>
+                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing State</th>
+                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing  Zip</th>
+                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing Country</th>
                                         
 
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredRecords.length === 0 ? (
+                                    {filteredData.length === 0 ? (
                                         <tr>
                                             <td colSpan="12" className={styles.no_data_message}>
                                                 No Data Found
                                             </td>
                                         </tr>
                                     ) : (
-                                        filteredRecords.map((record, index) => (
+                                        filteredData.map((record, index) => (
                                             
                                             <tr key={index}>
-                                                <td className={styles.td}>{record.accountDetails?.Name}</td>
-                                                <td className={styles.td}>{record.manufacturers?.[0]?.salesRep || 'N/A'}</td>
+                                                <td className={`${styles.td} ${styles.stickyFirstColumn}`}>{record.accountDetails?.Name} </td>
+                                                <td className={`${styles.td} ${styles.stickySecondColumn}`}>{record.manufacturers?.[0]?.salesRep || 'N/A'}</td>
                                                 <td className={styles.td}> {record.manufacturers?.[0]?.manufacturerName || 'N/A'}</td>
                                                 <td className={styles.td}> {record.accountDetails?.Active_Closed__c || 'N/A'}</td>
                                                 <td className={styles.td}>{record.contact?.FirstName || 'N/A'}</td>
