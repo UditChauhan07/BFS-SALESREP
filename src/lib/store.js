@@ -1,7 +1,7 @@
 import { getPermissions } from "./permission";
-export const originAPi = process.env.REACT_APP_OA_URL || "https://temp.beautyfashionsales.com/"
+// export const originAPi = process.env.REACT_APP_OA_URL || "https://temp.beautyfashionsales.com/"
 // export const originAPi = "https://dev.beautyfashionsales.com"
-// export const originAPi = "http://localhost:2611"
+export const originAPi = "http://localhost:2611"
 
 let url = `${originAPi}/beauty/`;
 let URL = `${originAPi}/beauty/0DS68FOD7s`;
@@ -1732,3 +1732,4 @@ export function DateConvert(dateString, timeStamp = false) {
     // throw new Error("Invalid date string");
   }
 }
+

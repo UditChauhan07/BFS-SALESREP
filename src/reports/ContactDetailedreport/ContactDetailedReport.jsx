@@ -1,11 +1,9 @@
-import React, { useEffect, useState , useMemo } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState, useMemo } from 'react';
 import AppLayout from '../../components/AppLayout';
-import Styles from "./index.module.css";
+import Styles from "./index.module.css"; // Preserving your original styles
 import { FilterItem } from '../../components/FilterItem';
-import { GetAuthData, originAPi, DestoryAuth } from '../../lib/store';
 import Loading from '../../components/Loading';
-import styles from "../../components/newness report table/table.module.css";
+import styles from "../../components/newness report table/table.module.css"; // Preserving your table styles
 import * as XLSX from 'xlsx';
 import { CloseButton } from "../../lib/svg";
 import { MdOutlineDownload } from "react-icons/md";
@@ -13,6 +11,8 @@ import { getPermissions } from "../../lib/permission";
 import FilterSearch from '../../components/FilterSearch';
 import PermissionDenied from '../../components/PermissionDeniedPopUp/PermissionDenied';
 import { useNavigate } from 'react-router-dom';
+import { fetchAccountDetails } from '../../lib/contactReport';
+
 function ContactDetailedReport() {
     const navigate = useNavigate();
     const [accountManufacturerRecords, setAccountManufacturerRecords] = useState([]);
@@ -21,18 +21,16 @@ function ContactDetailedReport() {
         accountFilter: '',
         saleRepFilter: '',
         manufacturerFilter: '',
-        accountStatusFilter: 'All',
-
+        accountStatusFilter: 'Active Account',
     });
+    const [debouncedFilters, setDebouncedFilters] = useState(filters); // Added state for debounced filters
     const [accounts, setAccounts] = useState([]);
     const [salesReps, setSalesReps] = useState([]);
     const [manufacturers, setManufacturers] = useState([]);
-    const [loading, setLoading] = useState(true); // Loading state
-    const [hasPermission, setHasPermission] = useState(null); // State to store permission status
+    const [loading, setLoading] = useState(true);
     const [permissions, setPermissions] = useState(null);
-    // Debounce filter changes
-    const [debouncedFilters, setDebouncedFilters] = useState(filters);
 
+    // Debounce Filter Updates
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             setDebouncedFilters(filters);
@@ -40,90 +38,58 @@ function ContactDetailedReport() {
         return () => clearTimeout(timeoutId);
     }, [filters]);
 
-    const fetchAccountDetails = async () => {
-        setLoading(true); // Show loader
-        try {
-            const data = await GetAuthData();
-            if (!data) {
-                console.log("No data found, destroying auth");
-                DestoryAuth();
-                return;
+    useEffect(() => {
+        async function fetchData() {
+            setLoading(true);
+            await fetchAccountDetails(
+                setLoading,
+                setAccountManufacturerRecords,
+                setFilteredRecords,
+                setAccounts,
+                setSalesReps,
+                setManufacturers
+            );
+
+            try {
+                const userPermissions = await getPermissions();
+                setPermissions(userPermissions);
+                if (!userPermissions?.modules?.reports?.contactDetailedReport.view) {
+                    PermissionDenied();
+                    navigate('/dashboard');
+                }
+            } catch (err) {
+                console.error("Error fetching permissions", err);
+            } finally {
+                setLoading(false);
             }
-    
-            const accessToken = data.access_token;
-            console.log("Access Token:", accessToken);
-    
-            // Fetch account manufacturer records
-            const apiUrl = `${originAPi}/skahHqskfz/NbvBPAyVSQ`;
-            const res = await axios.post(apiUrl, { accessToken });
-    
-            console.log("API Response:", res.data);
-    
-            if (res.data && res.data.accountManufacturerRecords) {
-                const records = res.data.accountManufacturerRecords;
-    
-                // Flatten the contact records with the main account manufacturer records
-                const expandedRecords = records.flatMap((record) => {
-                    const contacts = record.contacts || [];
-                    return contacts.length
-                        ? contacts.map((contact) => ({
-                            ...record,
-                            contact // Embed each contact into the record
-                        }))
-                        : [{ ...record, contact: null }]; // Handle case where there are no contacts
-                });
-    
-                setAccountManufacturerRecords(expandedRecords);
-                setFilteredRecords(expandedRecords);
-    
-                // Extract accounts, sales reps, and manufacturers for filter dropdowns
-                const accountList = expandedRecords.map((record) => ({
-                    label: record.AccountId__r?.Name,
-                    value: record.AccountId__r?.Name,
-                }));
-    
-                const saleRepList = expandedRecords.map((record) => ({
-                    label: record.Sales_Rep__r?.Name,
-                    value: record.Sales_Rep__r?.Name,
-                }));
-    
-                const manufacturerList = expandedRecords.map((record) => ({
-                    label: record.ManufacturerName__c,
-                    value: record.ManufacturerName__c,
-                }));
-    
-                // Remove duplicates using Map
-                setAccounts([...new Map(accountList.map(account => [account.value, account])).values()]);
-                setSalesReps([...new Map(saleRepList.map(rep => [rep.value, rep])).values()]);
-                setManufacturers([...new Map(manufacturerList.map(manufacturer => [manufacturer.value, manufacturer])).values()]);
-            }
-        } catch (error) {
-            console.error("Error fetching account details:", error);
-        } finally {
-            setLoading(false); // Hide loader
         }
-    };
-    useEffect(() => {
-        fetchAccountDetails();
+
+        fetchData();
     }, []);
-    
-    
-    // Filter records by account name, sales rep, and manufacturer
+
+    // Filter records based on the search criteria
     useEffect(() => {
-        const newFilteredRecords = accountManufacturerRecords.filter((record) => {
+        const newFilteredRecords = accountManufacturerRecords.filter(record => {
             const accountMatch = debouncedFilters.accountFilter
-                ? record.AccountId__r?.Name?.toLowerCase().includes(debouncedFilters.accountFilter.toLowerCase())
+                ? record.accountDetails?.Name?.toLowerCase().includes(debouncedFilters.accountFilter.toLowerCase())
                 : true;
             const saleRepMatch = debouncedFilters.saleRepFilter
-                ? record.Sales_Rep__r?.Name?.toLowerCase().includes(debouncedFilters.saleRepFilter.toLowerCase())
+                ? record.manufacturers?.[0]?.salesRep?.toLowerCase().includes(debouncedFilters.saleRepFilter.toLowerCase())
                 : true;
             const manufacturerMatch = debouncedFilters.manufacturerFilter
-                ? record.ManufacturerName__c?.toLowerCase().includes(debouncedFilters.manufacturerFilter.toLowerCase())
+                ? record.manufacturers?.[0]?.manufacturerName?.toLowerCase().includes(debouncedFilters.manufacturerFilter.toLowerCase())
                 : true;
-            return accountMatch && saleRepMatch && manufacturerMatch;
-        });
+            
+const accountStatusMatch = filters.accountStatusFilter === 'All'
+? true // If 'All' is selected, show all accounts
+: filters.accountStatusFilter === 'Active Account'
+    ? record.accountDetails?.Active_Closed__c === 'Active Account' // Show only active accounts
+    : false;
 
+            return  accountStatusMatch &&  manufacturerMatch && saleRepMatch && accountStatusMatch && accountMatch;
+        });
         setFilteredRecords(newFilteredRecords);
+        console.log('filtered record'  , newFilteredRecords)
     }, [debouncedFilters, accountManufacturerRecords]);
 
     const handleFilterChange = (filterType, value) => {
@@ -131,276 +97,197 @@ function ContactDetailedReport() {
     };
 
     const handleClearFilters = async () => {
-        // Reset filters
         setFilters({
             accountFilter: '',
             saleRepFilter: '',
             manufacturerFilter: '',
-            accountStatusFilter: 'All',
+            accountStatusFilter: 'Active Account',
         });
-        setLoading(true); // Show loader
-    
-        // Refetch data
-        await fetchAccountDetails();
-    };
-
-    const handleSearch = () => {
-        // Trigger any additional search logic if needed
+       
     };
 
     const handleExportToExcel = () => {
-        // Prepare data for export
         const exportData = filteredRecords.map(record => ({
-            'Account Name': record.AccountId__r?.Name || '',
+            'Account Name': record.accountDetails?.Name || '',
             'First Name': record.contact?.FirstName || 'N/A',
             'Last Name': record.contact?.LastName || 'N/A',
             'Sales Rep': record.Sales_Rep__r?.Name || 'N/A',
-            'Manufacturer': record.ManufacturerName__c || 'N/A',
+            'Manufacturer': record.manufacturers?.ManufacturerName__c || 'N/A',
             'Email': record.contact?.Email || 'N/A',
             'Phone': record.contact?.Phone || 'N/A',
             'Account Number': record.Account_Number__c || 'N/A',
             'Margin': record.Margin__c || 'N/A',
             'Payment Type': record.Payment_Type__c || 'N/A',
-            'Store Street': record.AccountId__r?.Store_Street__c || 'N/A',
-            'Store City': record.AccountId__r?.Store_City__c || 'N/A',
-            'Store State': record.AccountId__r?.Store_State__c || 'N/A',
-            'Store Zip': record.AccountId__r?.Store_Zip__c || 'N/A',
-            'Store Country': record.AccountId__r?.Store_Country__c || 'N/A',
-            'Shipping Street': record.AccountId__r?.ShippingStreet || 'N/A',
-            'Shipping City': record.AccountId__r?.ShippingCity || 'N/A',
-            'Shipping State': record.AccountId__r?.ShippingState || 'n/A',
-            'Shipping Zip': record.AccountId__r?.ShippingPostalCode || 'N/A',
-            'Shipping Country': record.AccountId__r?.ShippingCountry || 'N/A',
-            'Billing Street': record.AccountId__r?.BillingStreet || 'N/A',
-            'Billing City': record.AccountId__r?.BillingCity || 'N/A',
-            'Billing State': record.AccountId__r?.BillingState || 'N/A',
-            'Billing Zip': record.AccountId__r?.BillingPostalCode || 'N/A',
-            'Billing Country': record.AccountId__r?.BillingCountry || 'N/A',
+            'Store Street': record.accountDetails?.Store_Street__c || 'N/A',
+            'Store City': record.accountDetails?.Store_City__c || 'N/A',
+            'Store State': record.accountDetails?.Store_State__c || 'N/A',
+            'Store Zip': record.accountDetails?.Store_Zip__c || 'N/A',
+            'Store Country': record.accountDetails?.Store_Country__c || 'N/A',
+            'Shipping Street': record.accountDetails?.ShippingStreet || 'N/A',
+            'Shipping City': record.accountDetails?.ShippingCity || 'N/A',
+            'Shipping State': record.accountDetails?.ShippingState || 'N/A',
+            'Shipping Zip': record.accountDetails?.ShippingPostalCode || 'N/A',
+            'Shipping Country': record.accountDetails?.ShippingCountry || 'N/A',
+            'Billing Street': record.accountDetails?.BillingStreet || 'N/A',
+            'Billing City': record.accountDetails?.BillingCity || 'N/A',
+            'Billing State': record.accountDetails?.BillingState || 'N/A',
+            'Billing Zip': record.accountDetails?.BillingPostalCode || 'N/A',
+            'Billing Country': record.accountDetails?.BillingCountry || 'N/A',
         }));
 
-        // Create a new workbook and add the data
         const ws = XLSX.utils.json_to_sheet(exportData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Contacts');
-
-        // Export the workbook
         XLSX.writeFile(wb, 'ContactDetailedReport.xlsx');
     };
-    useEffect(() => {
-        const newFilteredRecords = accountManufacturerRecords.filter((record) => {
-            const accountMatch = debouncedFilters.accountFilter
-                ? record.AccountId__r?.Name?.toLowerCase().includes(debouncedFilters.accountFilter.toLowerCase())
-                : true;
-            const saleRepMatch = debouncedFilters.saleRepFilter
-                ? record.Sales_Rep__r?.Name?.toLowerCase().includes(debouncedFilters.saleRepFilter.toLowerCase())
-                : true;
-            const manufacturerMatch = debouncedFilters.manufacturerFilter
-                ? record.ManufacturerName__c?.toLowerCase().includes(debouncedFilters.manufacturerFilter.toLowerCase())
-                : true;
-    
-            // Filter by account status
-            const accountStatusMatch = debouncedFilters.accountStatusFilter === 'All'  // If "All" is selected, no filter
-                ? true
-                : record.AccountId__r?.Active_Closed__c === debouncedFilters.accountStatusFilter;
-    
-            return accountMatch && saleRepMatch && manufacturerMatch && accountStatusMatch;
-        });
-    
-        setFilteredRecords(newFilteredRecords);
-    }, [debouncedFilters, accountManufacturerRecords]);
-    
-    useEffect(() => {
-        async function fetchPermissions() {
-          try {
-            const user = await GetAuthData(); // Fetch user data
-            const userPermissions = await getPermissions(); // Fetch permissions
-            setPermissions(userPermissions); // Set permissions in state
-            if (userPermissions?.modules?.reports?.contactDetailedReport.view === false) {
-                PermissionDenied()
-                navigate('/dashboard')
-            }
-          } catch (err) {
-            console.error("Error fetching permissions", err);
-          }
-        }
-    
-        fetchPermissions(); // Fetch permissions on mount
-      }, []);
-    
-      // Memoize permissions to avoid unnecessary re-calculations
-      const memoizedPermissions = useMemo(() => permissions, [permissions]);
-    
+
+    // Memoize permissions to avoid unnecessary re-calculations
+    const memoizedPermissions = useMemo(() => permissions, [permissions]);
 
     return (
         <AppLayout
-            filterNodes={
-                <>
-                {memoizedPermissions?.modules?.godLevel  ? <> 
-                
+        filterNodes={
+            <>
+               {memoizedPermissions?.modules?.godLevel && (
                     <FilterItem
                         minWidth="200px"
-                        label="Sales Rep"                       
+                        label="Sales Rep"
                         value={filters.saleRepFilter}
-                        name = 'Sales Rep'
+                        name='Sales Rep'
                         options={salesReps}
                         onChange={(value) => handleFilterChange('saleRepFilter', value)}
-                        onFocus={() => setFilters(prev => ({ ...prev, accountFilter: '', manufacturerFilter: '' }))}
+                        onFocus={() => setFilters(prev => ({ ...prev, manufacturerFilter: '' }))}
                     />
-                </> : null }
-                    {/* <FilterItem
-                        minWidth="200px"
-                        label="Account Name"
-                        value={filters.accountFilter}
-                        name='Account Name'
-                        options={accounts}
-                        onChange={(value) => handleFilterChange('accountFilter', value)}
-                        onFocus={() => setFilters(prev => ({ ...prev, saleRepFilter: '', manufacturerFilter: '' }))} 
-                    /> */}
-                    
-                   
-                    <FilterItem
-                        minWidth="200px"
-                        label="Manufacturer"
-                        name = "Manufacturer"
-                        value={filters.manufacturerFilter}
-                        options={manufacturers}
-                        onChange={(value) => handleFilterChange('manufacturerFilter', value)}
-                        onFocus={() => setFilters(prev => ({ ...prev, accountFilter: '', saleRepFilter: '' }))}
-                    />
-
-<FilterItem
+                )}
+             <FilterItem
+                    minWidth="200px"
+                    label="Manufacturer"
+                    name="Manufacturer"
+                    value={filters.manufacturerFilter}
+                    options={manufacturers}
+                    onChange={(value) => handleFilterChange('manufacturerFilter', value)}
+                    onFocus={() => setFilters(prev => ({ ...prev, saleRepFilter: '' }))}
+                />
+               <FilterItem
     minWidth="200px"
     label="Account Status"
     name="Account Status"
-    value={filters.accountStatusFilter}  // This defaults to 'All'
+    value={filters.accountStatusFilter} // Show current filter value
     options={[
-        { label: 'All Accounts', value: 'All' }, 
-        { label: 'Active Accounts', value: 'Active Account' }, 
-        { label: 'Closed Accounts', value: 'Closed Account' }
+        { label: 'Active Accounts', value: 'Active Account' }, // Default option
+        { label: 'All Accounts', value: 'All' }, // Option to show all accounts
     ]}
-    onChange={(value) => handleFilterChange('accountStatusFilter', value)}
+    onChange={(value) => handleFilterChange('accountStatusFilter', value)} // Handle filter change
 />
-
-<FilterSearch
-  onChange={(e) => handleFilterChange('accountFilter', e.target.value)}
-  value={filters.accountFilter}
-  placeholder={"Search by account"}
-  minWidth={"167px"}
-/>
-
-
-
-                    <div>
+                <FilterSearch
+                    onChange={(e) => handleFilterChange('accountFilter', e.target.value)}
+                    value={filters.accountFilter}
+                    placeholder={"Search by account"}
+                    minWidth={"167px"}
+                />
+                <div>
                     <button className="border px-2 py-1 leading-tight d-grid" onClick={handleClearFilters}>
-              <CloseButton crossFill={'#fff'} height={20} width={20} />
-              <small style={{ fontSize: '6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>clear</small>
-            </button>
-                   
+                        <CloseButton crossFill={'#fff'} height={20} width={20} />
+                        <small style={{ fontSize: '6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>clear</small>
+                    </button>
                 </div>
-                    
-                     <button className="border px-2 py-1 leading-tight d-grid" onClick={handleExportToExcel}>
-            <MdOutlineDownload size={16} className="m-auto" />
-            <small style={{ fontSize: '6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>export</small>
-          </button>
-            
-                </>
-            }
+                <button className="border px-2 py-1 leading-tight d-grid" onClick={handleExportToExcel}>
+                    <MdOutlineDownload size={16} className="m-auto" />
+                    <small style={{ fontSize: '6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>export</small>
+                </button>
+            </>
+        }
         >
-
-<div className={Styles.inorderflex}>
-        <div>
-          <h2>
-            Contact Detailed Report
-          </h2>
-        </div>
-        <div></div>
-      </div>
-           
             {loading ? (
-                <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "70vh" }}>
-                    <Loading />
-                </div>
+                <Loading />
             ) : (
-                <div className={`d-flex p-3 ${Styles.tableBoundary} mb-5`}>
-                    <div style={{ maxHeight: "73vh", minHeight: "40vh", overflow: "auto", width: "100%" }}>
-                        <table id="salesReportTable" className="table table-responsive" style={{ minHeight: "300px" }}>
-                        <thead >
-    <tr>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Account Name</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Manufacturer</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>First Name</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Last Name</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Sales Rep</th>
-        
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Email</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Phone</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Account Number</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Margin</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Payment Type</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Store Street</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Store City</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Store State</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Store Zip</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Store Country</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Shipping Street</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Shipping City</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Shipping State</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Shipping Zip</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Shipping Country</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Billing Street</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Billing City</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Billing State/Province</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Billing Zip/Postal Code</th>
-        <th className={`${styles.th} ${styles.stickyFirstColumnHeading} `} style={{ minWidth: "200px" }}>Billing Country</th>
-    </tr>
-</thead>
+                <>
+                    <div className={`d-flex p-3 ${Styles.tableBoundary} mb-5`}>
+                        <div style={{ maxHeight: "73vh", minHeight: "40vh", overflow: "auto", width: "100%" }}>
+                            <table className="table table-responsive" style={{ minHeight: "300px" }}>
+                                <thead>
+                                    <tr>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Account Name</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}> Sales Rep</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Manufacturer</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Status</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>First Name </th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Last Name</th>
+                                        
+                                     
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Email</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Phone</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Account Number</th>
+                                       
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Margin</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Payment Type</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Store Street</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Store City</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Store State</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Store Zip</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Store Country</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Shipping Street</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Shipping City</th>
 
-<tbody>
-  {filteredRecords.length > 0 ? (
-    filteredRecords.map((record, index) => (
-      <tr key={index}>
-        <td className={`${Styles.td} ${Styles.stickyFirstColumn}`}>{record.AccountId__r?.Name}</td>
-        <td className={`${Styles.td} ${Styles.stickyFirstColumn}`}>{record.ManufacturerName__c}</td>
-        <td>{record.contact?.FirstName || 'N/A'}</td>
-        <td>{record.contact?.LastName || 'N/A'}</td>
-        <td>{record.Sales_Rep__r?.Name || 'N/A'}</td>
-        <td>{record.contact?.Email || 'N/A'}</td>
-        <td>{record.contact?.Phone || 'N/A'}</td>
-        <td>{record.Account_Number__c || 'N/A'}</td>
-        <td>{record.Margin__c || 'N/A'}</td>
-        <td>{record.Payment_Type__c || 'N/A'}</td>
-        <td>{record.AccountId__r?.Store_Street__c || 'N/A'}</td>
-        <td>{record.AccountId__r?.Store_City__c || 'N/A'}</td>
-        <td>{record.AccountId__r?.Store_State__c || 'N/A'}</td>
-        <td>{record.AccountId__r?.Store_Zip__c || 'N/A'}</td>
-        <td>{record.AccountId__r?.Store_Country__c || 'N/A'}  </td>
-        <td className={`${Styles.td}`}>{record.AccountId__r?.ShippingStreet || 'N/A'}</td>
-        <td className={`${Styles.td}`}>{record.AccountId__r?.ShippingCity || 'N/A'}</td>
-        <td className={`${Styles.td}`}>{record.AccountId__r?.ShippingState || 'N/A'}</td>
-        <td className={`${Styles.td}`}>{record.AccountId__r?.ShippingPostalCode || 'N/A'}</td>
-        <td className={`${Styles.td}`}>{record.AccountId__r?.ShippingCountry || 'N/A'}</td>
-        <td className={`${Styles.td}`}>{record.AccountId__r?.BillingStreet || 'N/A'}</td>
-        <td className={`${Styles.td}`}>{record.AccountId__r?.BillingCity || 'N/A'}</td>
-        <td className={`${Styles.td}`}>{record.AccountId__r?.BillingState || 'N/A'}</td>
-        <td className={`${Styles.td}`}>{record.AccountId__r?.BillingPostalCode || 'N/A'}</td>
-        <td className={`${Styles.td}`}>{record.AccountId__r?.BillingCountry || 'N/A'}</td>
-      </tr>
-    ))
-  ) : (
-    <tr>
-      <td colSpan="24" >
-        {/* Adjust the colSpan value based on the number of columns in your table */}
-        <div className={`${styles.NodataText} w-full`}>
-          <p>No data found</p>
-        </div>
-      </td>
-    </tr>
-  )}
-</tbody>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Shipping State</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Shipping  Zip</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Shipping Country</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Billing street</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Billing City </th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Billing State</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Billing  Zip</th>
+                                        <th className={`${styles.th} ${styles.stickyFirstColumnHeading}`} style={{ minWidth: "200px" }}>Billing Country</th>
+                                        
 
-                        </table>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredRecords.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="12" className={styles.no_data_message}>
+                                                No Data Found
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        filteredRecords.map((record, index) => (
+                                            
+                                            <tr key={index}>
+                                                <td className={styles.td}>{record.accountDetails?.Name}</td>
+                                                <td className={styles.td}>{record.manufacturers?.[0]?.salesRep || 'N/A'}</td>
+                                                <td className={styles.td}> {record.manufacturers?.[0]?.manufacturerName || 'N/A'}</td>
+                                                <td className={styles.td}> {record.accountDetails?.Active_Closed__c || 'N/A'}</td>
+                                                <td className={styles.td}>{record.contact?.FirstName || 'N/A'}</td>
+                                                <td className={styles.td}>{record.contact?.LastName || 'N/A'}</td>
+                                                <td className={styles.td}>{record.contact?.Email || 'N/A'}</td>
+                                                <td className={styles.td}>{record.contact?.Phone || 'N/A'}</td>
+                                                <td>{record.manufacturers?.[0]?.accountNumber || 'N/A'}</td>
+
+                                                <td className={styles.td}>{record.manufacturers?.[0]?.margin || 'N/A'}</td>
+                                                <td className={styles.td}>{record.manufacturers?.[0]?.paymentType || 'N/A'}</td>
+                                                <td className={styles.td}>{record.accountDetails?.Store_Street__c || 'N/A'}</td>
+                                                <td className={styles.td}>{record.accountDetails?.Store_City__c || 'N/A'}</td>
+                                                <td className={styles.td}>{record.accountDetails?.Store_State__c || 'N/A'}</td>
+                                                <td className={styles.td}>{record.accountDetails?.Store_Zip__c || 'N/A'}</td>
+                                                <td className={styles.td}>{record.accountDetails?.Store_Country__c || 'N/A'}</td> 
+                                                <td className={styles.td}>{record.accountDetails?.ShippingStreets || 'N/A'}</td> 
+                                                <td className={styles.td}>{record.accountDetails?.ShippingCity || 'N/A'}</td>
+                                                <td className={styles.td}>{record.accountDetails?.ShippingState || 'N/A'}</td>
+                                                <td className={styles.td}>{record.accountDetails?.ShippingPostalCode || 'N/A'}</td>
+                                                <td className={styles.td}>{record.accountDetails?.ShippingCountry || 'N/A'}</td>
+                                                <td className={styles.td}>{record.accountDetails?.BillingStreet || 'N/A'}</td>
+                                                <td className={styles.td}>{record.accountDetails?.BillingCity || 'N/A'}</td>
+                                                <td className={styles.td}>{record.accountDetails?.BillingState || 'N/A'}</td>
+                                                <td className={styles.td}>{record.accountDetails?.BillingPostalCode || 'N/A'}</td>
+                                                <td className={styles.td}>{record.accountDetails?.BillingCountry || 'N/A'}</td>
+
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
+                </>
             )}
         </AppLayout>
     );
