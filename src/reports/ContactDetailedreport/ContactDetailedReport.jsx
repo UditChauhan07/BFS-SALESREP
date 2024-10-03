@@ -241,14 +241,14 @@ function ContactDetailedReport() {
                                         <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Shipping Street</th>
                                         <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Shipping City</th>
 
-                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Shipping State</th>
-                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Shipping  Zip</th>
-                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Shipping Country</th>
-                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing street</th>
-                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing City </th>
-                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing State</th>
-                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing  Zip</th>
-                                        <th className={`${styles.th}${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing Country</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Shipping State</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Shipping  Zip</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Shipping Country</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing street</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing City </th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing State</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing  Zip</th>
+                                        <th className={`${styles.th} ${styles.stickyMonth}`} style={{ minWidth: "200px" }}>Billing Country</th>
                                         
 
                                     </tr>
