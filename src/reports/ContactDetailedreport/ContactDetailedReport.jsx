@@ -76,11 +76,11 @@ function ContactDetailedReport() {
                 : true;
     
             const saleRepMatch = debouncedFilters.saleRepFilter
-                ? record.manufacturers?.[0]?.salesRep?.toLowerCase().includes(debouncedFilters.saleRepFilter.toLowerCase())
+                ? record.manufacturers?.salesRep?.toLowerCase().includes(debouncedFilters.saleRepFilter.toLowerCase())
                 : true;
     
             const manufacturerMatch = debouncedFilters.manufacturerFilter
-                ? record.manufacturers?.[0]?.manufacturerName?.toLowerCase().includes(debouncedFilters.manufacturerFilter.toLowerCase())
+                ? record.manufacturers?.manufacturerName?.toLowerCase().includes(debouncedFilters.manufacturerFilter.toLowerCase())
                 : true;
     
             const accountStatusMatch = filters.accountStatusFilter === 'All'
@@ -115,13 +115,13 @@ function ContactDetailedReport() {
             'Account Name': record.accountDetails?.Name || '',
             'First Name': record.contact?.FirstName || 'N/A',
             'Last Name': record.contact?.LastName || 'N/A',
-            'Sales Rep':record.manufacturers?.[0]?.salesRep || 'N/A',
-            'Manufacturer': record.manufacturers?.[0]?.manufacturerName || 'N/A',
+            'Sales Rep':record.manufacturers?.salesRep || 'N/A',
+            'Manufacturer': record.manufacturers?.manufacturerName || 'N/A',
             'Email': record.contact?.Email || 'N/A',
             'Phone': record.contact?.Phone || 'N/A',
-            'Account Number': record.manufacturers?.[0]?.accountNumber || 'N/A',
-            'Margin': record.manufacturers?.[0]?.margin || 'N/A',
-            'Payment Type': record.manufacturers?.[0]?.paymentType  || 'N/A',
+            'Account Number': record.manufacturers?.accountNumber || 'N/A',
+            'Margin': record.manufacturers?.margin || 'N/A',
+            'Payment Type': record.manufacturers?.paymentType  || 'N/A',
             'Store Street': record.accountDetails?.Store_Street__c || 'N/A',
             'Store City': record.accountDetails?.Store_City__c || 'N/A',
             'Store State': record.accountDetails?.Store_State__c || 'N/A',
@@ -265,23 +265,23 @@ function ContactDetailedReport() {
                                             
                                             <tr key={index}>
                                                 <td className={`${styles.td} ${styles.stickyFirstColumn}`}>{record.accountDetails?.Name} </td>
-                                                <td className={`${styles.td} ${styles.stickySecondColumn}`}>{record.manufacturers?.[0]?.salesRep || 'N/A'}</td>
-                                                <td className={styles.td}> {record.manufacturers?.[0]?.manufacturerName || 'N/A'}</td>
+                                                <td className={`${styles.td} ${styles.stickySecondColumn}`}>{record.manufacturers?.salesRep || 'N/A'}</td>
+                                                <td className={styles.td}> {record.manufacturers?.manufacturerName || 'N/A'}</td>
                                                 <td className={styles.td}> {record.accountDetails?.Active_Closed__c || 'N/A'}</td>
-                                                <td className={styles.td}>{record.contact?.FirstName || 'N/A'}</td>
+                                                <td className={styles.td}>{record?.contact?.FirstName || 'N/A'}</td>
                                                 <td className={styles.td}>{record.contact?.LastName || 'N/A'}</td>
                                                 <td className={styles.td}>{record.contact?.Email || 'N/A'}</td>
                                                 <td className={styles.td}>{record.contact?.Phone || 'N/A'}</td>
-                                                <td>{record.manufacturers?.[0]?.accountNumber || 'N/A'}</td>
+                                                <td>{record.manufacturers?.accountNumber || 'N/A'}</td>
 
-                                                <td className={styles.td}>{record.manufacturers?.[0]?.margin || 'N/A'}</td>
-                                                <td className={styles.td}>{record.manufacturers?.[0]?.paymentType || 'N/A'}</td>
+                                                <td className={styles.td}>{record.manufacturers?.margin || 'N/A'}</td>
+                                                <td className={styles.td}>{record.manufacturers?.paymentType || 'N/A'}</td>
                                                 <td className={styles.td}>{record.accountDetails?.Store_Street__c || 'N/A'}</td>
                                                 <td className={styles.td}>{record.accountDetails?.Store_City__c || 'N/A'}</td>
                                                 <td className={styles.td}>{record.accountDetails?.Store_State__c || 'N/A'}</td>
                                                 <td className={styles.td}>{record.accountDetails?.Store_Zip__c || 'N/A'}</td>
                                                 <td className={styles.td}>{record.accountDetails?.Store_Country__c || 'N/A'}</td> 
-                                                <td className={styles.td}>{record.accountDetails?.ShippingStreets || 'N/A'}</td> 
+                                                <td className={styles.td}>{record.accountDetails?.ShippingStreet || 'N/A'}</td> 
                                                 <td className={styles.td}>{record.accountDetails?.ShippingCity || 'N/A'}</td>
                                                 <td className={styles.td}>{record.accountDetails?.ShippingState || 'N/A'}</td>
                                                 <td className={styles.td}>{record.accountDetails?.ShippingPostalCode || 'N/A'}</td>

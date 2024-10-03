@@ -100,7 +100,7 @@ export const fetchAccountDetails = async (
 
       // Flatten records for easier access
       const expandedRecords = records.flatMap(record => {
-        const contacts = record.contacts || [];
+        const contacts = record.contact || [];
         return contacts.length
           ? contacts.map(contact => ({
               ...record,
@@ -123,13 +123,13 @@ export const fetchAccountDetails = async (
           value: name,
         }));
 
-      const salesRepList = Array.from(new Set(activeRecords.map(record => record.manufacturers?.[0]?.salesRep)))
+      const salesRepList = Array.from(new Set(activeRecords.map(record => record.manufacturers?.salesRep)))
         .map(name => ({
           label: name,
           value: name,
         })).filter(item => item.label); // Filter out any null or undefined values
 
-      const manufacturerList = Array.from(new Set(activeRecords.map(record => record.manufacturers?.[0]?.manufacturerName)))
+      const manufacturerList = Array.from(new Set(activeRecords.map(record => record.manufacturers?.manufacturerName)))
         .map(name => ({
           label: name,
           value: name,
