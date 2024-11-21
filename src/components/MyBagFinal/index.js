@@ -197,7 +197,7 @@ function MyBagFinal({ showOrderFor }) {
               ShippingCountry: order?.Account?.address?.country,
               ShippingZip: order?.Account?.address?.postalCode,
               list,
-              key: user.data.x_access_token,
+              key: user.x_access_token,
               shippingMethod: order.Account.shippingMethod , 
            
               
